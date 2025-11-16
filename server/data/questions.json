@@ -1,152 +1,62 @@
 [
   {
     "id": "q1",
-    "text": "How often have you felt nervous or stressed in the last week?",
-    "options": [
-      "Never",
-      "Sometimes",
-      "Often",
-      "Almost always"
-    ]
+    "text": "In the last month, how often have you been upset because of something that happened unexpectedly?",
+    "options": ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"]
   },
   {
     "id": "q2",
-    "text": "How often have you had trouble relaxing?",
-    "options": [
-      "Never",
-      "Sometimes",
-      "Often",
-      "Almost always"
-    ]
+    "text": "In the last month, how often have you felt that you were unable to control the important things in your life?",
+    "options": ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"]
   },
   {
     "id": "q3",
-    "text": "How frequently did you feel overwhelmed?",
-    "options": [
-      "Never",
-      "Sometimes",
-      "Often",
-      "Almost always"
-    ]
+    "text": "In the last month, how often have you felt nervous and stressed?",
+    "options": ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"]
   },
   {
     "id": "q4",
-    "text": "How often did you have poor sleep due to worry?",
-    "options": [
-      "Never",
-      "Sometimes",
-      "Often",
-      "Almost always"
-    ]
+    "text": "In the last month, how often have you felt confident about your ability to handle your personal problems?",
+    "options": ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"]
   },
   {
     "id": "q5",
-    "text": "How much has stress affected your daily functioning?",
-    "options": [
-      "Not at all",
-      "A little",
-      "Moderately",
-      "Severely"
-    ]
+    "text": "In the last month, how often have you felt that things were going your way?",
+    "options": ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"]
   },
   {
     "id": "q6",
-    "text": "How often did you feel irritable or short-tempered?",
-    "options": [
-      "Never",
-      "Sometimes",
-      "Often",
-      "Almost always"
-    ]
+    "text": "In the last month, how often have you found that you could not cope with all the things that you had to do?",
+    "options": ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"]
   },
   {
     "id": "q7",
-    "text": "How often did you have difficulty concentrating?",
-    "options": [
-      "Never",
-      "Sometimes",
-      "Often",
-      "Almost always"
-    ]
+    "text": "In the last month, how often have you been able to control irritations in your life?",
+    "options": ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"]
   },
   {
     "id": "q8",
-    "text": "How often did you feel hopeless or unable to cope?",
-    "options": [
-      "Never",
-      "Sometimes",
-      "Often",
-      "Almost always"
-    ]
+    "text": "In the last month, how often have you felt that you were on top of things?",
+    "options": ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"]
   },
   {
     "id": "q9",
-    "text": "How often did physical symptoms (headaches, tension) accompany your stress?",
-    "options": [
-      "Never",
-      "Sometimes",
-      "Often",
-      "Almost always"
-    ]
+    "text": "In the last month, how often have you been angered because of things that were outside of your control?",
+    "options": ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"]
   },
   {
     "id": "q10",
-    "text": "How often did you feel anxious about the future?",
-    "options": [
-      "Never",
-      "Sometimes",
-      "Often",
-      "Almost always"
-    ]
+    "text": "In the last month, how often have you felt difficulties were piling up so high that you could not overcome them?",
+    "options": ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"]
   },
   {
     "id": "q11",
-    "text": "How often did you have trouble controlling your worries?",
-    "options": [
-      "Never",
-      "Sometimes",
-      "Often",
-      "Almost always"
-    ]
+    "text": "In the last month, how often have you found yourself thinking about things that you have to accomplish?",
+    "options": ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"]
   },
   {
     "id": "q12",
-    "text": "How often did you engage in unhealthy coping mechanisms?",
-    "options": [
-      "Never",
-      "Sometimes",
-      "Often",
-      "Almost always"
-    ]
-  },
-  {
-    "id": "q13",
-    "text": "How often have you felt unmotivated or lacked energy?",
-    "options": [
-      "Never",
-      "Sometimes",
-      "Often",
-      "Almost always"
-    ]
-  },
-  {
-    "id": "q14",
-    "text": "How often did you experience difficulty making decisions?",
-    "options": [
-      "Never",
-      "Sometimes",
-      "Often",
-      "Almost always"
-    ]
-  },
-  {
-    "id": "q15",
-    "text": "How often did you feel isolated or disconnected from others?",
-    "options": [
-      "Never",
-      "Sometimes",
-      "Often",
-      "Almost always"
-    ]
+    "text": "In the last month, how often have you been able to control the way you spend your time?",
+    "options": ["Never", "Almost Never", "Sometimes", "Fairly Often", "Very Often"]
   }
 ]
