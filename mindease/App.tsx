@@ -85,14 +85,17 @@ const App: React.FC = () => {
 
       // Fetch breathing sessions and streak data
       const profileData = await apiClient.getProfile();
-      if ((profileData as any).breathingSessions) {
+      if ((profileData as any).breathingSessions && Array.isArray((profileData as any).breathingSessions)) {
         setBreathingSessions((profileData as any).breathingSessions);
       }
-      if ((profileData as any).current_streak !== undefined) {
-        setCurrentStreakAPI((profileData as any).current_streak);
-      }
-      if ((profileData as any).longest_streak !== undefined) {
-        setLongestStreakAPI((profileData as any).longest_streak);
+      const stats = (profileData as any).stats;
+      if (stats) {
+        if (stats.current_streak !== undefined) {
+          setCurrentStreakAPI(stats.current_streak);
+        }
+        if (stats.longest_streak !== undefined) {
+          setLongestStreakAPI(stats.longest_streak);
+        }
       }
       
       setStreak(getStreak(user.email));
@@ -134,6 +137,32 @@ const App: React.FC = () => {
     
     initializeAuth();
   }, []);
+
+  // Reload profile data when navigating to profile page
+  useEffect(() => {
+    if (currentPage === 'profile' && currentUser) {
+      const fetchProfileData = async () => {
+        try {
+          const profileData = await apiClient.getProfile();
+          if ((profileData as any).breathingSessions && Array.isArray((profileData as any).breathingSessions)) {
+            setBreathingSessions((profileData as any).breathingSessions);
+          }
+          const stats = (profileData as any).stats;
+          if (stats) {
+            if (stats.current_streak !== undefined) {
+              setCurrentStreakAPI(stats.current_streak);
+            }
+            if (stats.longest_streak !== undefined) {
+              setLongestStreakAPI(stats.longest_streak);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching profile data:', error);
+        }
+      };
+      fetchProfileData();
+    }
+  }, [currentPage, currentUser]);
 
   // Persist assessment history to server
   useEffect(() => {
