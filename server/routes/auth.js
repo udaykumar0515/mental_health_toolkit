@@ -24,13 +24,13 @@ const authenticateToken = (req, res, next) => {
 // POST /api/auth/signup
 router.post('/signup', async (req, res) => {
   try {
-    const { email, password, full_name } = req.body;
+    const { email, password, full_name, age, gender } = req.body;
 
     if (!email || !password || !full_name) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    const result = await registerUser(email, password, full_name);
+    const result = await registerUser(email, password, full_name, age, gender);
     res.status(201).json(result);
   } catch (error) {
     res.status(400).json({ message: error.message });

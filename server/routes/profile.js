@@ -1,7 +1,7 @@
 import express from 'express';
 import { authenticateToken } from './auth.js';
 import { getUserData } from '../auth.js';
-import { getUserAssessments } from '../database.js';
+import { getUserAssessments, getUserBreathingSessions, readMoodLogs, readJournals, findUserById } from '../database.js';
 
 const router = express.Router();
 
@@ -15,6 +15,12 @@ router.get('/data', authenticateToken, (req, res) => {
     }
 
     const assessments = getUserAssessments(req.userId);
+    const breathingSessions = getUserBreathingSessions(req.userId);
+    const allMoodLogs = readMoodLogs();
+    const userMoodLogs = allMoodLogs.filter(l => l.user_id === req.userId);
+    const allJournals = readJournals();
+    const userJournals = allJournals.filter(j => j.user_id === req.userId);
+    const fullUser = findUserById(req.userId);
     
     // Calculate stats
     const totalAssessments = assessments.length;
@@ -24,13 +30,19 @@ router.get('/data', authenticateToken, (req, res) => {
 
     const stats = {
       total_assessments: totalAssessments,
-      average_score: averageScore
+      average_score: averageScore,
+      total_breathing_sessions: breathingSessions.length,
+      total_mood_logs: userMoodLogs.length,
+      total_journals: userJournals.length,
+      current_streak: fullUser ? fullUser.current_streak || 0 : 0,
+      longest_streak: fullUser ? fullUser.longest_streak || 0 : 0
     };
 
     res.status(200).json({
       user,
       assessments: assessments.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
-      stats
+      stats,
+      breathingSessions: breathingSessions.sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
     });
   } catch (error) {
     console.error('Error fetching profile:', error);

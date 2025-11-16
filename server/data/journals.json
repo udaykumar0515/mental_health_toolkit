@@ -1,0 +1,20 @@
+[
+  {
+    "id": "journal_1763299950136",
+    "user_id": "user_1763299801974",
+    "title": "Untitled",
+    "content": "i am good",
+    "mood": "neutral",
+    "created_at": "2025-11-16T13:32:30.136Z",
+    "updated_at": "2025-11-16T13:32:30.136Z"
+  },
+  {
+    "id": "journal_1763301612304",
+    "user_id": "user_1763301539525",
+    "title": "Untitled",
+    "content": "hiiiiiiiiiiiiii",
+    "mood": "neutral",
+    "created_at": "2025-11-16T14:00:12.304Z",
+    "updated_at": "2025-11-16T14:00:12.304Z"
+  }
+]

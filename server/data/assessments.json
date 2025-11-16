@@ -1,29 +1,83 @@
 [
   {
-    "id": "assessment_1763278978799",
-    "user_id": "user_1763278479829",
-    "stress_level": "moderate",
-    "score": 47,
+    "id": "assessment_1763299850702",
+    "user_id": "user_1763299801974",
+    "stress_level": "Mild",
+    "score": 22,
     "answers": {
-      "q1": 1,
-      "q2": 3,
-      "q3": 1,
-      "q4": 1,
-      "q5": 2,
-      "q6": 3,
-      "q7": 1,
-      "q8": 1,
-      "q9": 1,
-      "q10": 1,
-      "q11": 1,
-      "q12": 1
+      "q1": "2",
+      "q2": "2",
+      "q3": "2",
+      "q4": "2",
+      "q5": "2",
+      "q6": "2",
+      "q7": "2",
+      "q8": "2",
+      "q9": "2",
+      "q10": "2",
+      "q11": "2",
+      "q12": "2"
     },
     "recommendations": [
-      "Try short breathing exercises",
-      "Take short breaks during work",
-      "Practice mindfulness techniques",
-      "Spend time on relaxing activities"
+      "Practice Mindfulness",
+      "Prioritize and Plan",
+      "Boost Self-Care",
+      "Reflect on Control"
     ],
-    "created_at": "2025-11-16T07:42:58.799Z"
+    "created_at": "2025-11-16T13:30:50.702Z"
+  },
+  {
+    "id": "assessment_1763300943615",
+    "user_id": "user_1763299801974",
+    "stress_level": "Mild",
+    "score": 19,
+    "answers": {
+      "q1": "3",
+      "q2": "1",
+      "q3": "3",
+      "q4": "1",
+      "q5": "3",
+      "q6": "1",
+      "q7": "3",
+      "q8": "3",
+      "q9": "1",
+      "q10": "3",
+      "q11": "1",
+      "q12": "3"
+    },
+    "recommendations": [
+      "Practice Daily Mindfulness",
+      "Identify and Prioritize Tasks",
+      "Engage in Relaxing Activities",
+      "Build on Your Strengths"
+    ],
+    "created_at": "2025-11-16T13:49:03.615Z"
+  },
+  {
+    "id": "assessment_1763301564989",
+    "user_id": "user_1763301539525",
+    "stress_level": "Mild",
+    "score": 15,
+    "answers": {
+      "q1": "1",
+      "q2": "1",
+      "q3": "1",
+      "q4": "3",
+      "q5": "2",
+      "q6": "3",
+      "q7": "3",
+      "q8": "2",
+      "q9": "1",
+      "q10": "0",
+      "q11": "1",
+      "q12": "2"
+    },
+    "recommendations": [
+      "Prioritize and Plan Effectively",
+      "Leverage Your Strengths in Problem Solving",
+      "Mindful Breaks and Time Control",
+      "Focus on What You Can Influence"
+    ],
+    "created_at": "2025-11-16T13:59:24.989Z"
   }
 ]

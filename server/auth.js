@@ -31,7 +31,7 @@ const verifyToken = (token) => {
   }
 };
 
-export const registerUser = async (email, password, full_name) => {
+export const registerUser = async (email, password, full_name, age, gender) => {
   // Check if user already exists
   if (findUserByEmail(email)) {
     throw new Error('User already exists');
@@ -51,8 +51,14 @@ export const registerUser = async (email, password, full_name) => {
     email,
     password: hashedPassword,
     full_name,
+    age: age || 0,
+    gender: gender || 'prefer-not-to-say',
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    // streak tracking
+    current_streak: 0,
+    longest_streak: 0,
+    last_streak_date: null
   };
 
   dbCreateUser(user);
@@ -63,6 +69,8 @@ export const registerUser = async (email, password, full_name) => {
       id: user.id,
       email: user.email,
       full_name: user.full_name,
+      age: user.age,
+      gender: user.gender,
       created_at: user.created_at
     }
   };
@@ -87,6 +95,8 @@ export const loginUser = async (email, password) => {
       id: user.id,
       email: user.email,
       full_name: user.full_name,
+      age: user.age || 0,
+      gender: user.gender || 'prefer-not-to-say',
       created_at: user.created_at
     }
   };
@@ -103,6 +113,8 @@ export const getUserData = (userId) => {
     id: user.id,
     email: user.email,
     full_name: user.full_name,
+    age: user.age || 0,
+    gender: user.gender || 'prefer-not-to-say',
     created_at: user.created_at
   };
 };

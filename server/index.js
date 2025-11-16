@@ -7,6 +7,9 @@ import assessmentRoutes from './routes/assessment.js';
 import profileRoutes from './routes/profile.js';
 import questionsRoutes from './routes/questions.js';
 import breathingRoutes from './routes/breathing.js';
+import journalsRoutes from './routes/journals.js';
+import moodLogsRoutes from './routes/mood-logs.js';
+import streaksRoutes from './routes/streaks.js';
 
 dotenv.config();
 
@@ -31,6 +34,9 @@ app.use('/api/assessment', assessmentRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/questions', questionsRoutes);
 app.use('/api/breathing', breathingRoutes);
+app.use('/api/journals', journalsRoutes);
+app.use('/api/mood-logs', moodLogsRoutes);
+app.use('/api/streaks', streaksRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
