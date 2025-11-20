@@ -10,6 +10,7 @@ import breathingRoutes from './routes/breathing.js';
 import journalsRoutes from './routes/journals.js';
 import moodLogsRoutes from './routes/mood-logs.js';
 import streaksRoutes from './routes/streaks.js';
+import musicRoutes from './routes/music.js';
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use('/api/breathing', breathingRoutes);
 app.use('/api/journals', journalsRoutes);
 app.use('/api/mood-logs', moodLogsRoutes);
 app.use('/api/streaks', streaksRoutes);
+app.use('/api/music', musicRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

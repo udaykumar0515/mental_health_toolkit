@@ -16,5 +16,23 @@
     "mood": "neutral",
     "created_at": "2025-11-16T14:00:12.304Z",
     "updated_at": "2025-11-16T14:00:12.304Z"
+  },
+  {
+    "id": "journal_1763304000662",
+    "user_id": "user_1763303318174",
+    "title": "Untitled",
+    "content": "im feeling happy",
+    "mood": "neutral",
+    "created_at": "2025-11-16T14:40:00.662Z",
+    "updated_at": "2025-11-16T14:40:00.662Z"
+  },
+  {
+    "id": "journal_1763396596810",
+    "user_id": "user_1763303318174",
+    "title": "Untitled",
+    "content": "I am grateful for having supportive friends.\n",
+    "mood": "neutral",
+    "created_at": "2025-11-17T16:23:16.810Z",
+    "updated_at": "2025-11-17T16:23:16.810Z"
   }
 ]
