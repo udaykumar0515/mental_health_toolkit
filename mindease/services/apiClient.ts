@@ -1,74 +1,27 @@
+import { AuthResponse, User, Question, Assessment, JournalEntry, MoodLog, BreathingSession } from '../types';
+
 const API_BASE_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
-interface AuthResponse {
-  token: string;
-  user: {
-    id: string;
-    email: string;
-    full_name: string;
-    age?: number;
-    gender?: string;
-  };
-}
-
-interface User {
-  id: string;
-  email: string;
-  full_name: string;
-}
-
-interface Question {
-  id: string;
-  text: string;
-  options: string[];
-}
-
-interface Assessment {
-  id: string;
-  user_id: string;
-  stress_level: string;
-  score: number;
-  answers: Record<string, string>;
-  recommendations: string[];
-  created_at: string;
-}
-
-interface JournalEntry {
-  id: string;
-  user_id: string;
-  title: string;
-  content: string;
-  mood?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface MoodLog {
-  id: string;
-  user_id: string;
-  mood: string;
-  intensity: number;
-  note: string;
-  created_at: string;
-}
-
-interface BreathingSession {
-  id: string;
-  user_id: string;
-  duration: number;
-  cycles: number;
-  created_at: string;
-}
-
 class ApiClient {
-  private token: string | null = localStorage.getItem('auth_token');
+  private token: string | null = null;
+
+  constructor() {
+    this.token = localStorage.getItem('auth_token');
+  }
 
   setToken(token: string) {
-    this.token = token;
-    localStorage.setItem('auth_token', token);
+    if (token === '') {
+      this.token = null;
+      localStorage.removeItem('auth_token');
+    } else {
+      this.token = token;
+      localStorage.setItem('auth_token', token);
+    }
   }
 
   getToken(): string | null {
+    const storedToken = localStorage.getItem('auth_token');
+    this.token = storedToken;
     return this.token;
   }
 
@@ -340,6 +293,20 @@ class ApiClient {
 
     if (!response.ok) {
       throw new Error('Failed to update profile');
+    }
+
+    return response.json();
+  }
+
+  // ===== Music =====
+  async getMusicByMood(mood: string): Promise<{ mood: string; files: string[] }> {
+    const response = await fetch(`${API_BASE_URL}/music/${mood}`, {
+      method: 'GET',
+      headers: this.getHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch music for mood: ${mood}`);
     }
 
     return response.json();

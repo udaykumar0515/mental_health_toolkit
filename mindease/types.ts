@@ -1,8 +1,20 @@
+export interface AuthResponse {
+  token: string;
+  user: User;
+}
+
+export interface BreathingSession {
+  id: string;
+  user_id: string;
+  duration: number;
+  cycles: number;
+  created_at: string;
+}
 export type Page = 'dashboard' | 'assessment' | 'results' | 'breathing' | 'reframer' | 'chatbot' | 'profile' | 'login' | 'signup' | 'journal' | 'music' | 'mood-tracker';
 
 export type Theme = 'light' | 'dark';
 
-export type Mood = 'happy' | 'calm' | 'anxious' | 'sad' | 'irritable';
+export type Mood = 'happy' | 'calm' | 'anxious' | 'sad' | 'irritable' | 'chill';
 
 export type Gender = 'male' | 'female' | 'non-binary' | 'prefer-not-to-say';
 
@@ -44,9 +56,13 @@ export interface ChatMessage {
 }
 
 export interface JournalEntry {
-  id: number;
-  date: string;
+  id: string;
+  user_id: string;
+  title: string;
   content: string;
+  mood?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Track {
