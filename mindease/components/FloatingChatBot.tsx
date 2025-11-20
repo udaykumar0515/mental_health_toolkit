@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createChatSession } from '../services/geminiService';
-import BotIcon from './icons/BotIcon';
-import UserIcon from './icons/UserIcon';
+import { MessageSquare, User, Send } from 'lucide-react';
 import { ChatMessage } from '../types';
 import { Chat, GenerateContentResponse } from '@google/genai';
 
@@ -70,7 +69,7 @@ const FloatingChatBot: React.FC = () => {
         className="fixed bottom-6 right-6 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-110 z-40"
         aria-label="Open CalmBot chat"
       >
-        <BotIcon />
+        <MessageSquare size={24} />
       </button>
 
       {/* Chat Modal */}
@@ -80,7 +79,7 @@ const FloatingChatBot: React.FC = () => {
           <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400 rounded-full p-2">
-                <BotIcon />
+                <MessageSquare size={20} />
               </div>
               <div>
                 <h2 className="text-lg font-bold text-gray-800 dark:text-white">CalmBot</h2>
@@ -99,11 +98,11 @@ const FloatingChatBot: React.FC = () => {
           <div className="flex-1 p-4 overflow-y-auto space-y-3">
             {messages.map((msg, index) => (
               <div key={index} className={`flex items-start gap-2 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
-                {msg.sender === 'bot' && <div className="bg-gray-200 dark:bg-gray-700 rounded-full p-1.5 flex-shrink-0"><BotIcon className="w-4 h-4" /></div>}
+                {msg.sender === 'bot' && <div className="bg-gray-200 dark:bg-gray-700 rounded-full p-1.5 flex-shrink-0"><MessageSquare size={16} /></div>}
                 <div className={`max-w-xs p-2.5 rounded-lg text-sm ${msg.sender === 'user' ? 'bg-blue-500 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 rounded-bl-none'}`}>
                   {msg.text || <span className="animate-pulse">...</span>}
                 </div>
-                {msg.sender === 'user' && <div className="bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400 rounded-full p-1.5 flex-shrink-0"><UserIcon className="w-4 h-4" /></div>}
+                {msg.sender === 'user' && <div className="bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400 rounded-full p-1.5 flex-shrink-0"><User size={16} /></div>}
               </div>
             ))}
             <div ref={messagesEndRef} />
@@ -126,7 +125,7 @@ const FloatingChatBot: React.FC = () => {
                 disabled={isLoading || !input.trim()}
                 className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:bg-gray-400 dark:disabled:bg-gray-600 transition-colors"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                <Send size={16} />
               </button>
             </div>
           </div>

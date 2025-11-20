@@ -1,10 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createChatSession } from '../services/geminiService';
-import BotIcon from './icons/BotIcon';
-import UserIcon from './icons/UserIcon';
+import { MessageSquare, User, Send, ArrowLeft } from 'lucide-react';
 import { ChatMessage, Page } from '../types';
 import { Chat, GenerateContentResponse } from '@google/genai';
-import ArrowLeftIcon from './icons/ArrowLeftIcon';
 
 interface CalmBotProps {
     onNavigate: (page: Page) => void;
@@ -73,7 +71,7 @@ const CalmBot: React.FC<CalmBotProps> = ({ onNavigate }) => {
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                     <div className="bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400 rounded-full p-2">
-                        <BotIcon />
+                        <MessageSquare size={20} />
                     </div>
                     <div>
                         <h2 className="text-xl font-bold text-gray-800 dark:text-white">CalmBot</h2>
@@ -81,18 +79,18 @@ const CalmBot: React.FC<CalmBotProps> = ({ onNavigate }) => {
                     </div>
                 </div>
                 <button onClick={() => onNavigate('dashboard')} className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 font-semibold transition-colors">
-                    <ArrowLeftIcon />
+                    <ArrowLeft size={18} />
                     Dashboard
                 </button>
             </div>
             <div className="flex-1 p-6 overflow-y-auto space-y-4">
                 {messages.map((msg, index) => (
                     <div key={index} className={`flex items-start gap-3 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
-                        {msg.sender === 'bot' && <div className="bg-gray-200 dark:bg-gray-700 rounded-full p-2"><BotIcon/></div>}
+                        {msg.sender === 'bot' && <div className="bg-gray-200 dark:bg-gray-700 rounded-full p-2"><MessageSquare size={18} /></div>}
                         <div className={`max-w-xs md:max-w-md p-3 rounded-2xl ${msg.sender === 'user' ? 'bg-blue-500 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 rounded-bl-none'}`}>
                             {msg.text || <span className="animate-pulse">...</span>}
                         </div>
-                         {msg.sender === 'user' && <div className="bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400 rounded-full p-2"><UserIcon/></div>}
+                         {msg.sender === 'user' && <div className="bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400 rounded-full p-2"><User size={18} /></div>}
                     </div>
                 ))}
                 <div ref={messagesEndRef} />
@@ -109,7 +107,7 @@ const CalmBot: React.FC<CalmBotProps> = ({ onNavigate }) => {
                         disabled={isLoading}
                     />
                     <button onClick={handleSend} disabled={isLoading || !input.trim()} className="bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:bg-gray-400 dark:disabled:bg-gray-600 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                        <Send size={20} />
                     </button>
                 </div>
             </div>

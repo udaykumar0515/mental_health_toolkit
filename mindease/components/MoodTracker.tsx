@@ -1,11 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mood, MoodLog, Page } from '../types';
-import MoodHappyIcon from './icons/MoodHappyIcon';
-import MoodCalmIcon from './icons/MoodCalmIcon';
-import MoodAnxiousIcon from './icons/MoodAnxiousIcon';
-import MoodSadIcon from './icons/MoodSadIcon';
-import MoodIrritableIcon from './icons/MoodIrritableIcon';
-import ArrowLeftIcon from './icons/ArrowLeftIcon';
+import { Smile, Meh, Frown, Zap, Heart, ArrowLeft } from 'lucide-react';
 import { apiClient } from '../services/apiClient';
 
 interface MoodTrackerProps {
@@ -13,12 +8,12 @@ interface MoodTrackerProps {
   onNavigate: (page: Page) => void;
 }
 
-const moodOptions: { mood: Mood, label: string, icon: React.FC<{className?: string}>, color: string }[] = [
-    { mood: 'happy', label: 'Happy', icon: MoodHappyIcon, color: 'text-green-500' },
-    { mood: 'calm', label: 'Calm', icon: MoodCalmIcon, color: 'text-blue-500' },
-    { mood: 'anxious', label: 'Anxious', icon: MoodAnxiousIcon, color: 'text-orange-500' },
-    { mood: 'sad', label: 'Sad', icon: MoodSadIcon, color: 'text-indigo-500' },
-    { mood: 'irritable', label: 'Irritable', icon: MoodIrritableIcon, color: 'text-red-500' },
+const moodOptions: { mood: Mood, label: string, icon: React.FC<{size?: number}>, color: string }[] = [
+    { mood: 'happy', label: 'Happy', icon: Smile, color: 'text-green-500' },
+    { mood: 'calm', label: 'Calm', icon: Heart, color: 'text-blue-500' },
+    { mood: 'anxious', label: 'Anxious', icon: Zap, color: 'text-orange-500' },
+    { mood: 'sad', label: 'Sad', icon: Frown, color: 'text-indigo-500' },
+    { mood: 'irritable', label: 'Irritable', icon: Meh, color: 'text-red-500' },
 ];
 
 const MoodTracker: React.FC<MoodTrackerProps> = ({ onSave, onNavigate }) => {
@@ -94,7 +89,7 @@ const MoodTracker: React.FC<MoodTrackerProps> = ({ onSave, onNavigate }) => {
   return (
     <div className="max-w-2xl mx-auto">
       <button onClick={() => onNavigate('dashboard')} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 font-semibold mb-4 transition-colors">
-            <ArrowLeftIcon />
+            <ArrowLeft size={20} />
             Back to Dashboard
       </button>
       <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-8 rounded-2xl shadow-lg text-center border border-slate-200 dark:border-gray-700">
@@ -109,7 +104,7 @@ const MoodTracker: React.FC<MoodTrackerProps> = ({ onSave, onNavigate }) => {
                         disabled={isSaving}
                         className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center transition-all duration-300 transform disabled:opacity-50 disabled:cursor-not-allowed ${selectedMood === mood ? 'bg-blue-500 text-white scale-110 shadow-lg' : `bg-slate-100 dark:bg-gray-700 hover:bg-slate-200 dark:hover:bg-gray-600 ${color}`}`}
                     >
-                        <Icon className="w-8 h-8 sm:w-10 sm:h-10" />
+                        <Icon size={40} />
                     </button>
                     <span className={`mt-2 text-sm font-medium ${selectedMood === mood ? 'text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-300'}`}>{label}</span>
                 </div>

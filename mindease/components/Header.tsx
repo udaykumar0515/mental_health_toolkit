@@ -1,7 +1,6 @@
 import React from 'react';
 import { Page, User, Theme } from '../types';
-import SunIcon from './icons/SunIcon';
-import MoonIcon from './icons/MoonIcon';
+import { Sun, Moon } from 'lucide-react';
 
 interface HeaderProps {
   onNavigate: (page: Page) => void;
@@ -44,7 +43,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, currentUser, onLogout, them
                 className="ml-4 p-2 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors"
                 aria-label="Toggle theme"
             >
-                {theme === 'light' ? <MoonIcon /> : <SunIcon />}
+                {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
             </button>
           </div>
         </div>

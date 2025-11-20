@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Page } from '../types';
 import { apiClient } from '../services/apiClient';
-import ArrowLeftIcon from './icons/ArrowLeftIcon';
+import { ArrowLeft } from 'lucide-react';
 
 interface BreathingExerciseProps {
     onNavigate: (page: Page) => void;
@@ -108,7 +108,7 @@ const BreathingExercise: React.FC<BreathingExerciseProps> = ({ onNavigate }) => 
   return (
     <div className="max-w-md mx-auto">
         <button onClick={() => onNavigate('dashboard')} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 font-semibold mb-4 transition-colors">
-            <ArrowLeftIcon />
+            <ArrowLeft size={20} />
             Back to Dashboard
         </button>
         <div className="flex flex-col items-center justify-center p-4 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200 dark:border-gray-700">

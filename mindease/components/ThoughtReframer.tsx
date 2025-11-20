@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { reframeThought } from '../services/geminiService';
-import SparklesIcon from './icons/SparklesIcon';
-import BrainIcon from './icons/BrainIcon';
+import { Wand2, Brain, ArrowLeft } from 'lucide-react';
 import { Page } from '../types';
-import ArrowLeftIcon from './icons/ArrowLeftIcon';
 
 interface ThoughtReframerProps {
     onNavigate: (page: Page) => void;
@@ -38,12 +36,12 @@ const ThoughtReframer: React.FC<ThoughtReframerProps> = ({ onNavigate }) => {
   return (
     <div className="max-w-2xl mx-auto">
       <button onClick={() => onNavigate('dashboard')} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 font-semibold mb-4 transition-colors">
-            <ArrowLeftIcon />
+            <ArrowLeft size={20} />
             Back to Dashboard
       </button>
       <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-8 rounded-2xl shadow-lg text-center border border-slate-200 dark:border-gray-700">
         <div className="inline-flex justify-center items-center gap-2 mb-4 text-gray-800 dark:text-white">
-            <BrainIcon />
+            <Brain size={32} />
             <h2 className="text-3xl font-bold">Thought Reframer</h2>
         </div>
         <p className="text-gray-600 dark:text-gray-400 mb-6">Shift your perspective. Turn negative thoughts into empowering ones.</p>
@@ -61,7 +59,7 @@ const ThoughtReframer: React.FC<ThoughtReframerProps> = ({ onNavigate }) => {
           disabled={isLoading}
           className="bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-all disabled:bg-gray-400 dark:disabled:bg-gray-600 flex items-center justify-center mx-auto gap-2"
         >
-          {isLoading ? 'Reframing...' : <> <SparklesIcon /> Reframe My Thought </>}
+          {isLoading ? 'Reframing...' : <> <Wand2 size={18} /> Reframe My Thought </>}
         </button>
         {error && <p className="text-red-500 mt-4">{error}</p>}
       </div>

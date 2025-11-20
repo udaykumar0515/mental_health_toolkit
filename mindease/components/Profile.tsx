@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { Assessment, MoodLog, Theme, Page, User } from '../types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { Cell } from 'recharts';
-import ArrowLeftIcon from './icons/ArrowLeftIcon';
-import UserIcon from './icons/UserIcon';
+import { ArrowLeft, User as UserIcon } from 'lucide-react';
 
 interface ProfileProps {
   user: User;
@@ -57,7 +56,7 @@ const Profile: React.FC<ProfileProps> = ({ user, assessmentHistory, moodLogs, th
   return (
     <div className="max-w-7xl mx-auto space-y-8">
         <button onClick={() => onNavigate('dashboard')} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 font-semibold mb-0 transition-colors">
-            <ArrowLeftIcon />
+            <ArrowLeft size={20} />
             Back to Dashboard
         </button>
       <div className="text-center mb-12">

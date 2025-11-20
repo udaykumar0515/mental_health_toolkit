@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Page, Mood } from '../types';
-import MusicIcon from './icons/MusicIcon';
-import ArrowLeftIcon from './icons/ArrowLeftIcon';
+import { Music, ArrowLeft, SkipBack, Play, Pause, SkipForward } from 'lucide-react';
 import { apiClient } from '../services/apiClient';
 
 interface MusicPlayerProps {
@@ -73,7 +72,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ onNavigate }) => {
     return (
         <div className="max-w-4xl mx-auto">
             <button onClick={() => onNavigate('dashboard')} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 font-semibold mb-4 transition-colors">
-                <ArrowLeftIcon />
+                <ArrowLeft size={20} />
                 Back to Dashboard
             </button>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -88,7 +87,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ onNavigate }) => {
                 {/* Main Player */}
                 <div className="md:col-span-2 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-8 rounded-2xl shadow-lg flex flex-col items-center justify-center text-center border border-slate-200 dark:border-gray-700">
                     <div className="bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400 rounded-full p-6 mb-6">
-                        <MusicIcon size="large" />
+                        <Music size={48} />
                     </div>
                     <h2 className="text-3xl font-bold text-gray-800 dark:text-white">{musicFiles.length > 0 ? musicFiles[currentTrackIndex] : 'No tracks available'}</h2>
                     <p className="text-gray-500 dark:text-gray-400 mb-8">{selectedMood.charAt(0).toUpperCase() + selectedMood.slice(1)} Playlist</p>

@@ -1,10 +1,6 @@
 import React from 'react';
 import { Mood } from '../types';
-import MoodHappyIcon from './icons/MoodHappyIcon';
-import MoodCalmIcon from './icons/MoodCalmIcon';
-import MoodAnxiousIcon from './icons/MoodAnxiousIcon';
-import MoodSadIcon from './icons/MoodSadIcon';
-import MoodIrritableIcon from './icons/MoodIrritableIcon';
+import { Smile, Meh, Frown, Zap, Heart } from 'lucide-react';
 
 interface MoodCardProps {
   mood: Mood;
@@ -15,7 +11,7 @@ interface MoodCardProps {
 
 const moodConfig: Record<Mood, {
   label: string;
-  icon: React.FC<{ className?: string }>;
+  icon: React.FC<{ size?: number }>;
   supportiveText: string;
   suggestedAction: string;
   bgGradient: string;
@@ -24,7 +20,7 @@ const moodConfig: Record<Mood, {
 }> = {
   happy: {
     label: 'Happy',
-    icon: MoodHappyIcon,
+    icon: Smile,
     supportiveText: 'Feeling upbeat today! Keep the flow going.',
     suggestedAction: 'Try a 2-minute breathing exercise',
     bgGradient: 'from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20',
@@ -33,7 +29,7 @@ const moodConfig: Record<Mood, {
   },
   calm: {
     label: 'Calm',
-    icon: MoodCalmIcon,
+    icon: Heart,
     supportiveText: "You're in a peaceful state. Maintain this moment.",
     suggestedAction: 'Listen to calming music or meditate',
     bgGradient: 'from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20',
@@ -42,7 +38,7 @@ const moodConfig: Record<Mood, {
   },
   anxious: {
     label: 'Anxious',
-    icon: MoodAnxiousIcon,
+    icon: Zap,
     supportiveText: 'Take a breath. You\'re doing okay.',
     suggestedAction: 'Start a 60-second breathing exercise',
     bgGradient: 'from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20',
@@ -51,7 +47,7 @@ const moodConfig: Record<Mood, {
   },
   sad: {
     label: 'Sad',
-    icon: MoodSadIcon,
+    icon: Frown,
     supportiveText: 'Be gentle with yourself today.',
     suggestedAction: 'Write a quick journal entry',
     bgGradient: 'from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20',
@@ -60,7 +56,7 @@ const moodConfig: Record<Mood, {
   },
   irritable: {
     label: 'Irritable',
-    icon: MoodIrritableIcon,
+    icon: Meh,
     supportiveText: 'Let\'s reset for a minute.',
     suggestedAction: 'Try box breathing (4-4-4-4)',
     bgGradient: 'from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20',
@@ -69,7 +65,7 @@ const moodConfig: Record<Mood, {
   },
   chill: {
     label: 'Chill',
-    icon: MoodCalmIcon,
+    icon: Heart,
     supportiveText: 'You\'re in a relaxed vibe. Enjoy the moment.',
     suggestedAction: 'Listen to your favorite chill playlist',
     bgGradient: 'from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20',
@@ -90,7 +86,7 @@ const MoodCard: React.FC<MoodCardProps> = ({ mood, intensity, onChangeMood, anim
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className={`rounded-full p-4 ${config.iconBg}`}>
-            <Icon className={`w-8 h-8 ${config.iconColor}`} />
+            <Icon size={32} className={config.iconColor} />
           </div>
           <div>
             <h3 className="text-2xl font-bold text-slate-800 dark:text-white">

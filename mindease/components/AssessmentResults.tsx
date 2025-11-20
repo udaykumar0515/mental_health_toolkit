@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AssessmentResult, Page } from '../types';
-import LungsIcon from './icons/LungsIcon';
+import { Wind } from 'lucide-react';
 
 interface AssessmentResultsProps {
   result: AssessmentResult;
@@ -189,7 +189,7 @@ const AssessmentResults: React.FC<AssessmentResultsProps> = ({ result, onNavigat
             onClick={() => onNavigate('breathing')}
             className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 dark:from-blue-500 dark:to-blue-600 dark:hover:from-blue-600 dark:hover:to-blue-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105"
           >
-            <LungsIcon className="w-5 h-5" />
+            <Wind size={20} />
             Start Breathing Exercise
           </button>
 

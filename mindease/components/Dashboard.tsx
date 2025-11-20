@@ -1,13 +1,6 @@
 import React, { useState } from 'react';
 import { Page, User, MoodLog } from '../types';
-import BrainIcon from './icons/BrainIcon';
-import LungsIcon from './icons/LungsIcon';
-import ChartIcon from './icons/ChartIcon';
-import QuoteIcon from './icons/QuoteIcon';
-import JournalIcon from './icons/JournalIcon';
-import MusicIcon from './icons/MusicIcon';
-import FireIcon from './icons/FireIcon';
-import MoodHappyIcon from './icons/MoodHappyIcon';
+import { Brain, Wind, BookOpen, Music, Flame, Smile, Quote } from 'lucide-react';
 import MoodCard from './MoodCard';
 import { generateMotivationalQuote } from '../services/geminiService';
 
@@ -49,7 +42,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, quote: initialQuote, 
         </div>
         {streak > 0 && (
           <div className="flex items-center space-x-2 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm mt-3 sm:mt-0 px-3 py-2 rounded-lg shadow-sm border border-slate-200 dark:border-gray-700">
-            <FireIcon />
+            <Flame size={20} className="text-orange-500" />
             <div className="text-center">
               <p className="font-bold text-xl text-orange-500">{streak}</p>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 -mt-0.5">Day Streak</p>
@@ -81,7 +74,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, quote: initialQuote, 
               </div>
               <div className="flex items-center justify-end font-semibold group-hover:underline">
                 Log Today's Mood
-                <MoodHappyIcon className="ml-2 h-8 w-8" />
+                <Smile size={32} className="ml-2" />
               </div>
             </button>
           )}
@@ -90,28 +83,28 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, quote: initialQuote, 
             <FeatureCard
               title="Breathing Exercise"
               description="A guided session to find your calm."
-              icon={<LungsIcon />}
+              icon={<Wind size={24} />}
               onClick={() => onNavigate('breathing')}
               color="green"
             />
             <FeatureCard
               title="Thought Reframer"
               description="Challenge negative perspectives."
-              icon={<BrainIcon />}
+              icon={<Brain size={24} />}
               onClick={() => onNavigate('reframer')}
               color="purple"
             />
             <FeatureCard
               title="Journal"
               description="Record your thoughts and feelings."
-              icon={<JournalIcon />}
+              icon={<BookOpen size={24} />}
               onClick={() => onNavigate('journal')}
               color="yellow"
             />
              <FeatureCard
               title="Music Player"
               description="Listen to calming sounds to relax."
-              icon={<MusicIcon />}
+              icon={<Music size={24} />}
               onClick={() => onNavigate('music')}
               color="sky"
             />
@@ -132,7 +125,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, quote: initialQuote, 
             <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md p-6 rounded-2xl shadow-lg border border-slate-200 dark:border-gray-700">
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0 text-indigo-600 dark:text-indigo-300 mt-1">
-                      <QuoteIcon />
+                      <Quote size={24} />
                   </div>
                   <div className="flex-grow">
                     <p className="text-md italic text-slate-700 dark:text-slate-200 leading-relaxed">"{quote.quote}"</p>
