@@ -33,6 +33,7 @@ const App: React.FC = () => {
   const [breathingSessions, setBreathingSessions] = useState<Array<{ id: string; duration_seconds: number; cycles_completed: number; created_at: string }>>([]);
   const [currentStreakAPI, setCurrentStreakAPI] = useState(0);
   const [longestStreakAPI, setLongestStreakAPI] = useState(0);
+  const [isAuthInitialized, setIsAuthInitialized] = useState(false);
 
   // Initialize theme
   useEffect(() => {
@@ -112,10 +113,15 @@ const App: React.FC = () => {
   useEffect(() => {
     const initializeAuth = async () => {
       const token = apiClient.getToken();
+      console.log('Auth initialization - Token present:', !!token);
+      
       if (token) {
         // If we have a token, try to fetch profile
         try {
+          console.log('Attempting to validate token...');
           const profile = await apiClient.getProfile();
+          console.log('Token valid, profile fetched:', profile);
+          
           const user: User = { 
             email: (profile as any).email || (profile as any).user?.email,
             name: (profile as any).full_name || (profile as any).user?.full_name,
@@ -124,15 +130,28 @@ const App: React.FC = () => {
           };
           setCurrentUser(user);
           await loadUserData(user);
+          // Fetch quote immediately on page refresh
+          try {
+            const motivationalQuote = await generateMotivationalQuote();
+            setQuote(motivationalQuote);
+          } catch (error) {
+            console.error("Error fetching quote:", error);
+            setQuote({ quote: "The best way to predict the future is to create it.", author: "Peter Drucker" });
+          }
           setCurrentPage('dashboard');
         } catch (error) {
           // Token is invalid, clear it and go to login
+          console.log('Token validation failed, clearing token and going to login');
           apiClient.setToken('');
           setCurrentPage('login');
+          setCurrentUser(null);
         }
       } else {
+        console.log('No token found, going to login');
         setCurrentPage('login');
+        setCurrentUser(null);
       }
+      setIsAuthInitialized(true);
     };
     
     initializeAuth();
@@ -208,7 +227,15 @@ const App: React.FC = () => {
         gender: (response.user.gender as Gender) || 'prefer-not-to-say'
       };
       setCurrentUser(user);
-        await loadUserData(user);
+      await loadUserData(user);
+      // Fetch quote immediately after login
+      try {
+        const motivationalQuote = await generateMotivationalQuote();
+        setQuote(motivationalQuote);
+      } catch (error) {
+        console.error("Error fetching quote:", error);
+        setQuote({ quote: "The best way to predict the future is to create it.", author: "Peter Drucker" });
+      }
       setCurrentPage('dashboard');
       setAuthError(null);
     } catch (error) {
@@ -232,6 +259,14 @@ const App: React.FC = () => {
       setJournalEntries([]);
       setMoodLogs([]);
       setStreak(0);
+      // Fetch quote immediately after signup
+      try {
+        const motivationalQuote = await generateMotivationalQuote();
+        setQuote(motivationalQuote);
+      } catch (error) {
+        console.error("Error fetching quote:", error);
+        setQuote({ quote: "The best way to predict the future is to create it.", author: "Peter Drucker" });
+      }
       setCurrentPage('dashboard');
       setAuthError(null);
     } catch (error) {
@@ -241,12 +276,16 @@ const App: React.FC = () => {
   
   const handleLogout = () => {
     setCurrentUser(null);
-    apiClient.setToken(''); // Clear the token
+    setCurrentPage('login');
+    apiClient.setToken(''); // Clear the token - this will also remove from localStorage
     setAssessmentHistory([]);
     setJournalEntries([]);
     setMoodLogs([]);
     setStreak(0);
-    setCurrentPage('login');
+    setBreathingSessions([]);
+    setCurrentStreakAPI(0);
+    setLongestStreakAPI(0);
+    console.log('User logged out, redirected to login');
   };
 
   const handleAssessmentComplete = async (result: AssessmentResult, answers: number[]) => {
@@ -351,23 +390,19 @@ const App: React.FC = () => {
     }
   };
   
-  const fetchQuote = useCallback(async () => {
-    try {
-      const motivationalQuote = await generateMotivationalQuote();
-      setQuote(motivationalQuote);
-    } catch (error) {
-      console.error("Error fetching motivational quote:", error);
-      setQuote({ quote: "The best way to predict the future is to create it.", author: "Peter Drucker" });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (currentUser) { // Only fetch quote if logged in
-        fetchQuote();
-    }
-  }, [fetchQuote, currentUser]);
-  
   const renderPage = () => {
+    // Don't render anything until we've checked authentication
+    if (!isAuthInitialized) {
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+          </div>
+        </div>
+      );
+    }
+
     if (!currentUser) {
         switch (currentPage) {
             case 'login':

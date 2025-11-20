@@ -20,17 +20,15 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, currentUser, onLogout, them
   return (
     <header className="bg-white/60 backdrop-blur-lg dark:bg-gray-800/60 shadow-sm sticky top-0 z-50 border-b border-slate-200/80 dark:border-gray-700/80">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-14 md:h-16">
           <div className="flex-shrink-0 cursor-pointer" onClick={() => onNavigate(currentUser ? 'dashboard' : 'login')}>
-            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-teal-400">MindEase</h1>
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-teal-400">MindEase</h1>
           </div>
           <div className="flex items-center">
-            <nav className="hidden md:flex items-center space-x-2">
+            <nav className="hidden md:flex items-center space-x-3">
                 {currentUser ? (
                   <>
                     <NavItem onClick={() => onNavigate('dashboard')}>Dashboard</NavItem>
-                    <NavItem onClick={() => onNavigate('assessment')}>Assessment</NavItem>
-                    <NavItem onClick={() => onNavigate('journal')}>Journal</NavItem>
                     <NavItem onClick={() => onNavigate('profile')}>Profile</NavItem>
                     <NavItem onClick={onLogout}>Logout</NavItem>
                   </>

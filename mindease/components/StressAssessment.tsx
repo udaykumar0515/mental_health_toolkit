@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LIKERT_SCALE_OPTIONS } from '../constants';
+import { LIKERT_SCALE_OPTIONS, ASSESSMENT_QUESTIONS } from '../constants';
 import { analyzeStressAssessment } from '../services/geminiService';
 import { AssessmentResult } from '../types';
 import { apiClient } from '../services/apiClient';
@@ -7,7 +7,7 @@ import { apiClient } from '../services/apiClient';
 interface Question {
   id: string;
   text: string;
-  options: string[];
+  options?: string[];
 }
 
 interface StressAssessmentProps {
@@ -21,18 +21,22 @@ const StressAssessment: React.FC<StressAssessmentProps> = ({ onComplete }) => {
   const [error, setError] = useState<string | null>(null);
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
 
-  // Fetch questions from API on mount
+  // Fetch questions from API on mount, with fallback to constants
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
         const apiQuestions = await apiClient.getQuestions();
         setQuestions(apiQuestions);
-        setIsLoadingQuestions(false);
       } catch (err) {
-        console.error('Error fetching questions:', err);
-        setError('Could not load assessment questions. Please try again.');
-        setIsLoadingQuestions(false);
+        console.error('Error fetching questions from API, using fallback:', err);
+        // Fallback to constants if API fails
+        const fallbackQuestions = ASSESSMENT_QUESTIONS.map(q => ({
+          id: q.id.toString(),
+          text: q.text,
+        }));
+        setQuestions(fallbackQuestions);
       }
+      setIsLoadingQuestions(false);
     };
 
     fetchQuestions();
