@@ -267,5 +267,59 @@
       "Set Realistic Boundaries"
     ],
     "created_at": "2025-11-20T11:49:04.415Z"
+  },
+  {
+    "id": "assessment_1763640292902",
+    "user_id": "user_1763299801974",
+    "stress_level": "Mild",
+    "score": 22,
+    "answers": {
+      "q1": "2",
+      "q2": "2",
+      "q3": "2",
+      "q4": "2",
+      "q5": "2",
+      "q6": "2",
+      "q7": "2",
+      "q8": "2",
+      "q9": "2",
+      "q10": "2",
+      "q11": "2",
+      "q12": "2"
+    },
+    "recommendations": [
+      "Practice Mindfulness",
+      "Strengthen Time Management",
+      "Focus on Controllables",
+      "Reinforce Positive Habits"
+    ],
+    "created_at": "2025-11-20T12:04:52.902Z"
+  },
+  {
+    "id": "assessment_1763640389831",
+    "user_id": "user_1763299801974",
+    "stress_level": "Mild",
+    "score": 22,
+    "answers": {
+      "q1": "2",
+      "q2": "2",
+      "q3": "2",
+      "q4": "2",
+      "q5": "2",
+      "q6": "2",
+      "q7": "2",
+      "q8": "2",
+      "q9": "2",
+      "q10": "2",
+      "q11": "2",
+      "q12": "2"
+    },
+    "recommendations": [
+      "Practice Mindful Awareness",
+      "Boost Your Confidence",
+      "Structured Downtime",
+      "Gentle Problem Solving"
+    ],
+    "created_at": "2025-11-20T12:06:29.831Z"
   }
 ]
