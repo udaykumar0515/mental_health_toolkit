@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Assessment, MoodLog, Theme, Page, User } from '../types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { Cell } from 'recharts';
 import ArrowLeftIcon from './icons/ArrowLeftIcon';
 import UserIcon from './icons/UserIcon';
 
@@ -27,7 +28,8 @@ const Profile: React.FC<ProfileProps> = ({ user, assessmentHistory, moodLogs, th
     return acc;
   }, {} as Record<string, number>);
 
-  const moodChartData = Object.entries(moodDistribution).map(([name, value]) => ({ name, value }));
+    const moodChartData = Object.entries(moodDistribution).map(([name, value]) => ({ name, value }));
+    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   
   const chartTextColor = theme === 'dark' ? '#a0aec0' : '#4a5568';
   const chartGridColor = theme === 'dark' ? '#4a5568' : '#e2e8f0';
@@ -39,6 +41,18 @@ const Profile: React.FC<ProfileProps> = ({ user, assessmentHistory, moodLogs, th
       sad: '#6366f1',
       irritable: '#ef4444'
   };
+
+    // Custom tooltip that only shows the count/value (keeps UI minimal)
+    const CustomBarTooltip = ({ active, payload, theme }: any) => {
+        if (!active || !payload || !payload.length) return null;
+        const item = payload[0];
+        return (
+            <div className={`shadow-lg rounded-md p-2 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-slate-800'}`}>
+                <div className="text-sm font-semibold">{item.payload.name}</div>
+                <div className="text-xs opacity-80">value: {item.value}</div>
+            </div>
+        );
+    };
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
@@ -147,11 +161,22 @@ const Profile: React.FC<ProfileProps> = ({ user, assessmentHistory, moodLogs, th
                                     borderRadius: '0.5rem',
                                 }}
                             />
-                            <Bar dataKey="value" barSize={25} radius={[0, 10, 10, 0]}>
-                                {moodChartData.map((entry, index) => (
-                                    <Bar key={`cell-${index}`} fill={moodColors[entry.name as keyof typeof moodColors]} />
-                                ))}
-                            </Bar>
+                                    <Bar dataKey="value" barSize={25} radius={[0, 10, 10, 0]}>
+                                        {moodChartData.map((entry, index) => {
+                                            // fill: white in dark mode, dark in light mode; keep colored accents for labels elsewhere
+                                            const fillColor = theme === 'dark' ? '#ffffff' : (moodColors[entry.name as keyof typeof moodColors] || '#0f172a');
+                                            return (
+                                                <Cell
+                                                    key={`cell-${index}`}
+                                                    fill={fillColor}
+                                                    className={`bar-cell ${hoveredIndex === index ? 'bar-cell--lift' : ''}`}
+                                                    onMouseEnter={() => setHoveredIndex(index)}
+                                                    onMouseLeave={() => setHoveredIndex(null)}
+                                                />
+                                            );
+                                        })}
+                                    </Bar>
+                                    <Tooltip content={<CustomBarTooltip theme={theme} />} />
                         </BarChart>
                     </ResponsiveContainer>
                 ) : (

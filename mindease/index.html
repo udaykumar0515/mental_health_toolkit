@@ -74,6 +74,16 @@
       .mood-scale-in {
         animation: scaleIn 0.4s ease-out;
       }
+      /* Bar chart cell hover/lift */
+      .bar-cell {
+        transition: transform 160ms ease, filter 160ms ease;
+        transform-origin: center;
+        cursor: pointer;
+      }
+      .bar-cell--lift {
+        transform: translateY(-6px);
+        filter: drop-shadow(0 6px 10px rgba(2,6,23,0.18));
+      }
       body {
         font-family: 'Inter', sans-serif;
       }

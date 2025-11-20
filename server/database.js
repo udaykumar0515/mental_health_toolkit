@@ -285,5 +285,33 @@ export const initializeFiles = () => {
   if (!fs.existsSync(MOOD_LOGS_FILE)) {
     writeMoodLogs([]);
   }
-  console.log('✓ Data files initialized');
+  // Ensure older users have default age/gender to avoid undefined values
+  ensureUserDefaults();
+  console.log('✓ Data files initialized and user defaults ensured');
+};
+
+// Ensure all users have age and gender fields; migrate existing records in-place
+const ensureUserDefaults = () => {
+  try {
+    const users = readUsers();
+    let changed = false;
+    const updated = users.map(u => {
+      const copy = { ...u };
+      if (copy.age === undefined || copy.age === null) {
+        copy.age = 18;
+        changed = true;
+      }
+      if (!copy.gender) {
+        copy.gender = 'male';
+        changed = true;
+      }
+      return copy;
+    });
+    if (changed) {
+      writeUsers(updated);
+      console.log('✓ Migrated users: set default age/gender for existing users');
+    }
+  } catch (err) {
+    console.error('Error ensuring user defaults:', err);
+  }
 };
