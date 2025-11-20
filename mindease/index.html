@@ -40,6 +40,37 @@
       .page-animate {
         animation: fadeIn 0.5s ease-in-out;
       }
+      /* Mood Animation - Fly In */
+      @keyframes flyIn {
+        0% {
+          transform: translateY(-20px) scale(0.8);
+          opacity: 0;
+        }
+        100% {
+          transform: translateY(0px) scale(1);
+          opacity: 1;
+        }
+      }
+      .mood-fly-in {
+        animation: flyIn 0.4s ease-out;
+      }
+      /* Mood Animation - Highlight Pulse */
+      @keyframes highlightPulse {
+        0% { box-shadow: 0 0 0px rgba(59, 130, 246, 0.0); }
+        50% { box-shadow: 0 0 16px rgba(59, 130, 246, 0.6); }
+        100% { box-shadow: 0 0 0px rgba(59, 130, 246, 0.0); }
+      }
+      .mood-highlight {
+        animation: highlightPulse 1s ease-out;
+      }
+      /* Mood Animation - Scale In */
+      @keyframes scaleIn {
+        0% { transform: scale(0.9); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+      }
+      .mood-scale-in {
+        animation: scaleIn 0.4s ease-out;
+      }
       body {
         font-family: 'Inter', sans-serif;
       }

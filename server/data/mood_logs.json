@@ -54,5 +54,21 @@
     "intensity": 5,
     "note": "",
     "created_at": "2025-11-20T11:13:04.220Z"
+  },
+  {
+    "id": "mood_1763639025493",
+    "user_id": "user_1763299801974",
+    "mood": "anxious",
+    "intensity": 5,
+    "note": "",
+    "created_at": "2025-11-20T11:43:45.493Z"
+  },
+  {
+    "id": "mood_1763639025496",
+    "user_id": "user_1763299801974",
+    "mood": "anxious",
+    "intensity": 5,
+    "note": "",
+    "created_at": "2025-11-20T11:43:45.496Z"
   }
 ]

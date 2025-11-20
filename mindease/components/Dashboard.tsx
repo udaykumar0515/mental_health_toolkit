@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Page, User } from '../types';
+import { Page, User, MoodLog } from '../types';
 import BrainIcon from './icons/BrainIcon';
 import LungsIcon from './icons/LungsIcon';
 import ChartIcon from './icons/ChartIcon';
@@ -8,6 +8,7 @@ import JournalIcon from './icons/JournalIcon';
 import MusicIcon from './icons/MusicIcon';
 import FireIcon from './icons/FireIcon';
 import MoodHappyIcon from './icons/MoodHappyIcon';
+import MoodCard from './MoodCard';
 import { generateMotivationalQuote } from '../services/geminiService';
 
 interface DashboardProps {
@@ -15,9 +16,10 @@ interface DashboardProps {
   quote: { quote: string; author: string } | null;
   streak: number;
   user: User | null;
+  todayMood: MoodLog | null;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ onNavigate, quote: initialQuote, streak, user }) => {
+const Dashboard: React.FC<DashboardProps> = ({ onNavigate, quote: initialQuote, streak, user, todayMood }) => {
   const [quote, setQuote] = useState(initialQuote);
   const [isLoadingQuote, setIsLoadingQuote] = useState(false);
 
@@ -61,19 +63,28 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, quote: initialQuote, 
         
         {/* Left Column */}
         <div className="lg:col-span-2 space-y-6">
-          <button
-            onClick={() => handleNavigate('mood-tracker')}
-            className="w-full text-left group bg-gradient-to-br from-blue-600 to-teal-500 p-8 rounded-3xl shadow-2xl text-white flex flex-col justify-between h-56 md:h-64 hover:shadow-[0_20px_40px_rgba(15,23,42,0.15)] transition-all duration-300 transform hover:-translate-y-1"
-          >
-            <div>
-              <h2 className="text-3xl font-bold mb-2">How are you feeling?</h2>
-              <p className="opacity-80">Take a moment to check in with yourself.</p>
-            </div>
-            <div className="flex items-center justify-end font-semibold group-hover:underline">
-              Log Today's Mood
-              <MoodHappyIcon className="ml-2 h-8 w-8" />
-            </div>
-          </button>
+          {todayMood ? (
+            <MoodCard
+              mood={todayMood.mood}
+              intensity={todayMood.intensity || 5}
+              onChangeMood={() => handleNavigate('mood-tracker')}
+              animated={true}
+            />
+          ) : (
+            <button
+              onClick={() => handleNavigate('mood-tracker')}
+              className="w-full text-left group bg-gradient-to-br from-blue-600 to-teal-500 p-8 rounded-3xl shadow-2xl text-white flex flex-col justify-between h-56 md:h-64 hover:shadow-[0_20px_40px_rgba(15,23,42,0.15)] transition-all duration-300 transform hover:-translate-y-1"
+            >
+              <div>
+                <h2 className="text-3xl font-bold mb-2">How are you feeling?</h2>
+                <p className="opacity-80">Take a moment to check in with yourself.</p>
+              </div>
+              <div className="flex items-center justify-end font-semibold group-hover:underline">
+                Log Today's Mood
+                <MoodHappyIcon className="ml-2 h-8 w-8" />
+              </div>
+            </button>
+          )}
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FeatureCard

@@ -416,11 +416,12 @@ const App: React.FC = () => {
 
     switch (currentPage) {
       case 'dashboard':
-        return <Dashboard onNavigate={handleNavigate} quote={quote} streak={streak} user={currentUser} />;
+        const todaysMood = moodLogs.find(log => new Date(log.date).toDateString() === new Date().toDateString());
+        return <Dashboard onNavigate={handleNavigate} quote={quote} streak={streak} user={currentUser} todayMood={todaysMood || null} />;
       case 'assessment':
         return <StressAssessment onComplete={handleAssessmentComplete} />;
       case 'results':
-        return assessmentResult ? <AssessmentResults result={assessmentResult} onNavigate={handleNavigate} /> : <Dashboard onNavigate={handleNavigate} quote={quote} streak={streak} user={currentUser}/>;
+        return assessmentResult ? <AssessmentResults result={assessmentResult} onNavigate={handleNavigate} /> : <Dashboard onNavigate={handleNavigate} quote={quote} streak={streak} user={currentUser} todayMood={moodLogs.find(log => new Date(log.date).toDateString() === new Date().toDateString()) || null} />;
       case 'breathing':
         return <BreathingExercise onNavigate={handleNavigate} />;
       case 'reframer':
@@ -434,7 +435,8 @@ const App: React.FC = () => {
       case 'mood-tracker':
         return <MoodTracker onSave={handleSaveMoodLog} onNavigate={handleNavigate} />;
       default:
-        return <Dashboard onNavigate={handleNavigate} quote={quote} streak={streak} user={currentUser} />;
+        const defaultTodaysMood = moodLogs.find(log => new Date(log.date).toDateString() === new Date().toDateString());
+        return <Dashboard onNavigate={handleNavigate} quote={quote} streak={streak} user={currentUser} todayMood={defaultTodaysMood || null} />;
     }
   };
 
