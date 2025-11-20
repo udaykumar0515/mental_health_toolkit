@@ -153,28 +153,26 @@ const Profile: React.FC<ProfileProps> = ({ user, assessmentHistory, moodLogs, th
                         <BarChart data={moodChartData} layout="vertical" margin={{ top: 5, right: 20, left: 60, bottom: 5 }}>
                             <XAxis type="number" hide />
                             <YAxis type="category" dataKey="name" stroke={chartTextColor} axisLine={false} tickLine={false} width={60} style={{textTransform: 'capitalize'}} />
-                            <Tooltip
-                                contentStyle={{ 
-                                    backgroundColor: theme === 'dark' ? '#2d3748' : 'white', 
-                                    border: '1px solid',
-                                    borderColor: theme === 'dark' ? '#4a5568' : '#e2e8f0', 
-                                    borderRadius: '0.5rem',
-                                }}
-                            />
+                            {/* Using a single custom tooltip below to avoid duplicate tooltips */}
                                     <Bar dataKey="value" barSize={25} radius={[0, 10, 10, 0]}>
-                                        {moodChartData.map((entry, index) => {
-                                            // fill: white in dark mode, dark in light mode; keep colored accents for labels elsewhere
-                                            const fillColor = theme === 'dark' ? '#ffffff' : (moodColors[entry.name as keyof typeof moodColors] || '#0f172a');
-                                            return (
-                                                <Cell
-                                                    key={`cell-${index}`}
-                                                    fill={fillColor}
-                                                    className={`bar-cell ${hoveredIndex === index ? 'bar-cell--lift' : ''}`}
-                                                    onMouseEnter={() => setHoveredIndex(index)}
-                                                    onMouseLeave={() => setHoveredIndex(null)}
-                                                />
-                                            );
-                                        })}
+                                {moodChartData.map((entry, index) => {
+                                    // In dark mode use slightly off-white with subtle stroke so the bar doesn't fully wash out.
+                                    const isDark = theme === 'dark';
+                                    const baseColor = moodColors[entry.name as keyof typeof moodColors] || '#0f172a';
+                                    const fillColor = isDark ? 'rgba(255,255,255,0.92)' : baseColor;
+                                    const strokeColor = isDark ? 'rgba(2,6,23,0.14)' : 'transparent';
+                                    return (
+                                        <Cell
+                                            key={`cell-${index}`}
+                                            fill={fillColor}
+                                            stroke={strokeColor}
+                                            strokeWidth={isDark ? 1 : 0}
+                                            className={`bar-cell ${hoveredIndex === index ? 'bar-cell--lift' : ''}`}
+                                            onMouseEnter={() => setHoveredIndex(index)}
+                                            onMouseLeave={() => setHoveredIndex(null)}
+                                        />
+                                    );
+                                })}
                                     </Bar>
                                     <Tooltip content={<CustomBarTooltip theme={theme} />} />
                         </BarChart>
