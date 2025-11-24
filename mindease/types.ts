@@ -1,6 +1,6 @@
 export interface AuthResponse {
   token: string;
-  user: User;
+  user: UserResponse;
 }
 
 export interface BreathingSession {
@@ -10,7 +10,7 @@ export interface BreathingSession {
   cycles: number;
   created_at: string;
 }
-export type Page = 'dashboard' | 'assessment' | 'results' | 'breathing' | 'reframer' | 'chatbot' | 'profile' | 'login' | 'signup' | 'journal' | 'music' | 'mood-tracker';
+export type Page = 'dashboard' | 'assessment' | 'results' | 'breathing' | 'reframer' | 'chatbot' | 'profile' | 'login' | 'signup' | 'journal' | 'music' | 'mood-tracker' | 'feedback';
 
 export type Theme = 'light' | 'dark';
 
@@ -43,11 +43,11 @@ export interface AssessmentResult {
 }
 
 export interface Assessment {
-    id: number;
-    date: string;
-    score: number;
-    level: StressLevel;
-    responses: number[];
+  id: string;
+  date: string;
+  score: number;
+  level: StressLevel;
+  responses: number[];
 }
 
 export interface ChatMessage {
@@ -57,12 +57,13 @@ export interface ChatMessage {
 
 export interface JournalEntry {
   id: string;
-  user_id: string;
-  title: string;
+  date: string;
   content: string;
+  title?: string;
   mood?: string;
-  created_at: string;
-  updated_at: string;
+  user_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Track {
@@ -73,9 +74,70 @@ export interface Track {
 }
 
 export interface MoodLog {
-    id: number;
-    date: string;
-    mood: Mood;
-    intensity?: number;
-    note?: string;
+  id: string;
+  date: string;
+  mood: Mood;
+  intensity?: number;
+  note?: string;
+}
+
+export interface ProfileStats {
+  total_assessments: number;
+  average_score: number;
+  total_breathing_sessions: number;
+  total_mood_logs: number;
+  total_journals: number;
+  current_streak: number;
+  longest_streak: number;
+}
+
+export interface ProfileResponse {
+  user: User;
+  assessments: any[]; // You might want to type this properly if you have the Assessment type on the server side matching the client side
+  stats: ProfileStats;
+  breathingSessions: BreathingSession[];
+}
+
+// Server response types (what the API actually returns)
+export interface JournalEntryResponse {
+  id: string;
+  user_id: string;
+  title: string;
+  content: string;
+  mood?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MoodLogResponse {
+  id: string;
+  user_id: string;
+  mood: string;
+  intensity: number;
+  note?: string;
+  created_at: string;
+}
+
+export interface AssessmentResponse {
+  id: string;
+  user_id: string;
+  stress_level: string;
+  score: number;
+  answers: Record<string, string>;
+  recommendations: string[];
+  created_at: string;
+}
+
+export interface UserResponse {
+  id: string;
+  email: string;
+  full_name: string;
+  age: number;
+  gender: string;
+  password_hash: string;
+  created_at: string;
+  updated_at: string;
+  current_streak?: number;
+  longest_streak?: number;
+  last_streak_date?: string;
 }

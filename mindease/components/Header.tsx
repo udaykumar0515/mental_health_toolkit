@@ -11,7 +11,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onNavigate, currentUser, onLogout, theme, setTheme }) => {
-  
+
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
@@ -25,25 +25,26 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, currentUser, onLogout, them
           </div>
           <div className="flex items-center">
             <nav className="hidden md:flex items-center space-x-3">
-                {currentUser ? (
-                  <>
-                    <NavItem onClick={() => onNavigate('dashboard')}>Dashboard</NavItem>
-                    <NavItem onClick={() => onNavigate('profile')}>Profile</NavItem>
-                    <NavItem onClick={onLogout}>Logout</NavItem>
-                  </>
-                ) : (
-                  <>
-                    <NavItem onClick={() => onNavigate('login')}>Login</NavItem>
-                    <NavItem onClick={() => onNavigate('signup')}>Sign Up</NavItem>
-                  </>
-                )}
+              {currentUser ? (
+                <>
+                  <NavItem onClick={() => onNavigate('dashboard')}>Dashboard</NavItem>
+                  <NavItem onClick={() => onNavigate('profile')}>Profile</NavItem>
+                  <NavItem onClick={() => onNavigate('feedback')}>Feedback</NavItem>
+                  <NavItem onClick={onLogout}>Logout</NavItem>
+                </>
+              ) : (
+                <>
+                  <NavItem onClick={() => onNavigate('login')}>Login</NavItem>
+                  <NavItem onClick={() => onNavigate('signup')}>Sign Up</NavItem>
+                </>
+              )}
             </nav>
             <button
-                onClick={toggleTheme}
-                className="ml-4 p-2 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors"
-                aria-label="Toggle theme"
+              onClick={toggleTheme}
+              className="ml-4 p-2 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors"
+              aria-label="Toggle theme"
             >
-                {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
             </button>
           </div>
         </div>
@@ -53,9 +54,9 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, currentUser, onLogout, them
 };
 
 const NavItem: React.FC<{ onClick: () => void, children: React.ReactNode }> = ({ onClick, children }) => (
-    <button onClick={onClick} className="text-slate-600 dark:text-slate-300 hover:bg-blue-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
-        {children}
-    </button>
+  <button onClick={onClick} className="text-slate-600 dark:text-slate-300 hover:bg-blue-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
+    {children}
+  </button>
 );
 
 

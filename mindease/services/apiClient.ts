@@ -1,4 +1,4 @@
-import { AuthResponse, User, Question, Assessment, JournalEntry, MoodLog, BreathingSession } from '../types';
+import { AuthResponse, User, Question, Assessment, JournalEntry, MoodLog, BreathingSession, ProfileResponse, JournalEntryResponse, MoodLogResponse, AssessmentResponse, UserResponse } from '../types';
 
 const API_BASE_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -88,7 +88,7 @@ class ApiClient {
     stressLevel: string,
     score: number,
     recommendations: string[]
-  ): Promise<Assessment> {
+  ): Promise<AssessmentResponse> {
     const response = await fetch(`${API_BASE_URL}/assessment/submit`, {
       method: 'POST',
       headers: this.getHeaders(),
@@ -102,7 +102,7 @@ class ApiClient {
     return response.json();
   }
 
-  async getAssessmentHistory(): Promise<Assessment[]> {
+  async getAssessmentHistory(): Promise<AssessmentResponse[]> {
     const response = await fetch(`${API_BASE_URL}/assessment/history`, {
       method: 'GET',
       headers: this.getHeaders(),
@@ -115,7 +115,7 @@ class ApiClient {
     return response.json();
   }
 
-  async getLatestAssessment(): Promise<Assessment | null> {
+  async getLatestAssessment(): Promise<AssessmentResponse | null> {
     const response = await fetch(`${API_BASE_URL}/assessment/latest`, {
       method: 'GET',
       headers: this.getHeaders(),
@@ -129,7 +129,7 @@ class ApiClient {
   }
 
   // ===== Journals =====
-  async createJournal(title: string, content: string, mood?: string): Promise<JournalEntry> {
+  async createJournal(title: string, content: string, mood?: string): Promise<JournalEntryResponse> {
     const response = await fetch(`${API_BASE_URL}/journals`, {
       method: 'POST',
       headers: this.getHeaders(),
@@ -143,7 +143,7 @@ class ApiClient {
     return response.json();
   }
 
-  async getJournals(): Promise<JournalEntry[]> {
+  async getJournals(): Promise<JournalEntryResponse[]> {
     const response = await fetch(`${API_BASE_URL}/journals`, {
       method: 'GET',
       headers: this.getHeaders(),
@@ -156,7 +156,7 @@ class ApiClient {
     return response.json();
   }
 
-  async updateJournal(id: string, title?: string, content?: string, mood?: string): Promise<JournalEntry> {
+  async updateJournal(id: string, title?: string, content?: string, mood?: string): Promise<JournalEntryResponse> {
     const response = await fetch(`${API_BASE_URL}/journals/${id}`, {
       method: 'PUT',
       headers: this.getHeaders(),
@@ -182,7 +182,7 @@ class ApiClient {
   }
 
   // ===== Mood Logs =====
-  async createMoodLog(mood: string, intensity: number, note?: string): Promise<MoodLog> {
+  async createMoodLog(mood: string, intensity: number, note?: string): Promise<MoodLogResponse> {
     const response = await fetch(`${API_BASE_URL}/mood-logs`, {
       method: 'POST',
       headers: this.getHeaders(),
@@ -196,7 +196,7 @@ class ApiClient {
     return response.json();
   }
 
-  async getMoodLogs(): Promise<MoodLog[]> {
+  async getMoodLogs(): Promise<MoodLogResponse[]> {
     const response = await fetch(`${API_BASE_URL}/mood-logs`, {
       method: 'GET',
       headers: this.getHeaders(),
@@ -249,7 +249,7 @@ class ApiClient {
   }
 
   // ===== Profile =====
-  async getProfile(): Promise<User> {
+  async getProfile(): Promise<ProfileResponse> {
     // Get profile data (stats + sessions)
     const response = await fetch(`${API_BASE_URL}/profile/data`, {
       method: 'GET',
@@ -310,6 +310,31 @@ class ApiClient {
     }
 
     return response.json();
+  }
+  // ===== Feedback =====
+  async submitFeedback(content: string, rating: number, category: string, userDetails?: { name: string; email: string; user_id?: string }): Promise<any> {
+    const body = {
+      content,
+      rating,
+      category,
+      ...userDetails
+    };
+
+    const response = await fetch(`${API_BASE_URL}/feedback`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to submit feedback');
+    }
+
+    return response.json();
+  }
+
+  getMusicStreamUrl(mood: string, filename: string): string {
+    return `${API_BASE_URL}/music/${mood}/${filename}`;
   }
 }
 

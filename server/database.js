@@ -69,8 +69,8 @@ export const incrementUserStreak = (userId) => {
   if (idx === -1) return null;
 
   const user = users[idx];
-  const today = new Date().toISOString().slice(0,10);
-  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
+  const today = new Date().toISOString().slice(0, 10);
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
 
   let current = user.current_streak || 0;
   let longest = user.longest_streak || 0;
@@ -267,6 +267,35 @@ export const deleteMoodLog = (logId) => {
   return filtered;
 };
 
+// ===== Feedback =====
+const FEEDBACK_FILE = path.join(DATA_DIR, 'feedback.json');
+
+export const readFeedback = () => {
+  ensureDataDir();
+  if (!fs.existsSync(FEEDBACK_FILE)) {
+    return [];
+  }
+  try {
+    const data = fs.readFileSync(FEEDBACK_FILE, 'utf-8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error reading feedback:', error);
+    return [];
+  }
+};
+
+export const writeFeedback = (feedback) => {
+  ensureDataDir();
+  fs.writeFileSync(FEEDBACK_FILE, JSON.stringify(feedback, null, 2), 'utf-8');
+};
+
+export const createFeedback = (feedback) => {
+  const allFeedback = readFeedback();
+  allFeedback.push(feedback);
+  writeFeedback(allFeedback);
+  return feedback;
+};
+
 // Initialize files on startup
 export const initializeFiles = () => {
   ensureDataDir();
@@ -284,6 +313,9 @@ export const initializeFiles = () => {
   }
   if (!fs.existsSync(MOOD_LOGS_FILE)) {
     writeMoodLogs([]);
+  }
+  if (!fs.existsSync(FEEDBACK_FILE)) {
+    writeFeedback([]);
   }
   // Ensure older users have default age/gender to avoid undefined values
   ensureUserDefaults();
