@@ -1,6 +1,7 @@
 import express from 'express';
 import { authenticateToken } from './auth.js';
-import { createAssessment, getUserAssessments, getLatestAssessment } from '../database.js';
+import { createAssessment, getUserAssessments, getLatestAssessment, readAssessments } from '../database.js';
+import { exportAssessmentsToCSV } from '../utils/csvExport.js';
 
 const router = express.Router();
 
@@ -24,6 +25,10 @@ router.post('/submit', authenticateToken, (req, res) => {
     };
 
     createAssessment(assessment);
+    
+    // Export all assessments to CSV
+    const allAssessments = readAssessments();
+    exportAssessmentsToCSV(allAssessments);
 
     res.status(201).json(assessment);
   } catch (error) {
