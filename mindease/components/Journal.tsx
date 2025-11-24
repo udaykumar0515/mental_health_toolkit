@@ -4,13 +4,13 @@ import { BookOpen, ArrowLeft } from 'lucide-react';
 
 interface JournalProps {
   entries: JournalEntry[];
-  onSave: (entry: { id?: number; content: string }) => void;
+  onSave: (entry: { id?: string; content: string }) => void;
   onNavigate: (page: Page) => void;
 }
 
 const Journal: React.FC<JournalProps> = ({ entries, onSave, onNavigate }) => {
   const [currentContent, setCurrentContent] = useState('');
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const handleSave = () => {
     if (!currentContent.trim()) return;
@@ -32,8 +32,8 @@ const Journal: React.FC<JournalProps> = ({ entries, onSave, onNavigate }) => {
   return (
     <div className="max-w-4xl mx-auto">
       <button onClick={() => onNavigate('dashboard')} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 font-semibold mb-4 transition-colors">
-            <ArrowLeft size={20} />
-            Back to Dashboard
+        <ArrowLeft size={20} />
+        Back to Dashboard
       </button>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Sidebar for entries */}
@@ -50,9 +50,8 @@ const Journal: React.FC<JournalProps> = ({ entries, onSave, onNavigate }) => {
               <div
                 key={entry.id}
                 onClick={() => handleSelectEntry(entry)}
-                className={`p-3 rounded-lg cursor-pointer transition ${
-                  editingId === entry.id ? 'bg-blue-100 dark:bg-blue-900/50' : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
+                className={`p-3 rounded-lg cursor-pointer transition ${editingId === entry.id ? 'bg-blue-100 dark:bg-blue-900/50' : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
               >
                 <p className="font-semibold text-gray-800 dark:text-gray-200 text-sm">
                   {new Date(entry.date).toLocaleDateString('en-US', {
@@ -75,10 +74,10 @@ const Journal: React.FC<JournalProps> = ({ entries, onSave, onNavigate }) => {
         {/* Main editor */}
         <div className="md:col-span-2 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-slate-200 dark:border-gray-700">
           <div className="flex items-center gap-3 mb-4 text-gray-800 dark:text-white">
-              <BookOpen size={32} />
-              <h2 className="text-3xl font-bold">
-                  {editingId ? 'Edit Your Entry' : 'What\'s on your mind?'}
-              </h2>
+            <BookOpen size={32} />
+            <h2 className="text-3xl font-bold">
+              {editingId ? 'Edit Your Entry' : 'What\'s on your mind?'}
+            </h2>
           </div>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
             Journaling can help you understand your thoughts and feelings more clearly.

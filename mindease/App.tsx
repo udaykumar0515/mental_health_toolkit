@@ -6,7 +6,7 @@ import StressAssessment from './components/StressAssessment';
 import AssessmentResults from './components/AssessmentResults';
 import BreathingExercise from './components/BreathingExercise';
 import ThoughtReframer from './components/ThoughtReframer';
-import CalmBot from './components/CalmBot';
+
 import FloatingChatBot from './components/FloatingChatBot';
 import Profile from './components/Profile';
 import Login from './components/Login';
@@ -14,7 +14,8 @@ import Signup from './components/Signup';
 import Journal from './components/Journal';
 import MusicPlayer from './components/MusicPlayer';
 import MoodTracker from './components/MoodTracker';
-import { Page, AssessmentResult, Assessment, User, JournalEntry, Theme, MoodLog, StressLevel, Mood, Gender } from './types';
+import FeedbackForm from './components/FeedbackForm';
+import { Page, AssessmentResult, Assessment, User, JournalEntry, Theme, MoodLog, StressLevel, Mood, Gender, JournalEntryResponse, MoodLogResponse, AssessmentResponse, UserResponse } from './types';
 import { generateMotivationalQuote } from './services/geminiService';
 import { getStreak, updateStreak } from './utils/streaks';
 import { apiClient } from './services/apiClient';
@@ -53,43 +54,48 @@ const App: React.FC = () => {
     root.classList.add(theme);
     localStorage.setItem('mind_ease_theme', theme);
   }, [theme]);
-  
+
   const loadUserData = async (user: User) => {
     try {
       const history = await apiClient.getAssessmentHistory();
-        // Map API response to Assessment type
-        const assessments: Assessment[] = history.map(h => ({
-          id: Number(h.id.replace('assessment_', '')),
-          date: h.created_at,
-          score: h.score,
-          level: h.stress_level as StressLevel,
-          responses: Object.values(h.answers).map(a => parseInt(a as string))
-        }));
-        setAssessmentHistory(assessments);
-      
+      // Map API response to Assessment type
+      const assessments: Assessment[] = history.map(h => ({
+        id: h.id,
+        date: h.created_at,
+        score: h.score,
+        level: h.stress_level as StressLevel,
+        responses: Object.values(h.answers).map(a => parseInt(a as string))
+      }));
+      setAssessmentHistory(assessments);
+
       const journals = await apiClient.getJournals();
       const entries: JournalEntry[] = journals.map(j => ({
-        id: Number(j.id.replace('journal_', '')),
+        id: j.id,
         date: j.created_at,
-        content: j.content
+        content: j.content,
+        title: j.title,
+        mood: j.mood,
+        user_id: j.user_id,
+        created_at: j.created_at,
+        updated_at: j.updated_at
       }));
       setJournalEntries(entries);
-      
+
       const moodLogsData = await apiClient.getMoodLogs();
-        const logs: MoodLog[] = moodLogsData.map(m => ({
-          id: Number(m.id.replace('mood_', '')),
-          mood: m.mood as Mood,
-          note: m.note,
-          date: m.created_at
-        }));
+      const logs: MoodLog[] = moodLogsData.map(m => ({
+        id: m.id,
+        mood: m.mood as Mood,
+        note: m.note,
+        date: m.created_at
+      }));
       setMoodLogs(logs);
 
       // Fetch breathing sessions and streak data
       const profileData = await apiClient.getProfile();
-      if ((profileData as any).breathingSessions && Array.isArray((profileData as any).breathingSessions)) {
-        setBreathingSessions((profileData as any).breathingSessions);
+      if (profileData.breathingSessions && Array.isArray(profileData.breathingSessions)) {
+        setBreathingSessions(profileData.breathingSessions);
       }
-      const stats = (profileData as any).stats;
+      const stats = profileData.stats;
       if (stats) {
         if (stats.current_streak !== undefined) {
           setCurrentStreakAPI(stats.current_streak);
@@ -98,7 +104,7 @@ const App: React.FC = () => {
           setLongestStreakAPI(stats.longest_streak);
         }
       }
-      
+
       setStreak(getStreak(user.email));
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -114,19 +120,19 @@ const App: React.FC = () => {
     const initializeAuth = async () => {
       const token = apiClient.getToken();
       console.log('Auth initialization - Token present:', !!token);
-      
+
       if (token) {
         // If we have a token, try to fetch profile
         try {
           console.log('Attempting to validate token...');
           const profile = await apiClient.getProfile();
           console.log('Token valid, profile fetched:', profile);
-          
-          const user: User = { 
-            email: (profile as any).email || (profile as any).user?.email,
-            name: (profile as any).full_name || (profile as any).user?.full_name,
-            age: (profile as any).age || (profile as any).user?.age || 0,
-            gender: ((profile as any).gender || (profile as any).user?.gender || 'prefer-not-to-say') as Gender
+
+          const user: User = {
+            email: profile.user.email,
+            name: profile.user.name,
+            age: profile.user.age || 0,
+            gender: profile.user.gender || 'prefer-not-to-say'
           };
           setCurrentUser(user);
           await loadUserData(user);
@@ -153,7 +159,7 @@ const App: React.FC = () => {
       }
       setIsAuthInitialized(true);
     };
-    
+
     initializeAuth();
   }, []);
 
@@ -163,10 +169,10 @@ const App: React.FC = () => {
       const fetchProfileData = async () => {
         try {
           const profileData = await apiClient.getProfile();
-          if ((profileData as any).breathingSessions && Array.isArray((profileData as any).breathingSessions)) {
-            setBreathingSessions((profileData as any).breathingSessions);
+          if (profileData.breathingSessions && Array.isArray(profileData.breathingSessions)) {
+            setBreathingSessions(profileData.breathingSessions);
           }
-          const stats = (profileData as any).stats;
+          const stats = profileData.stats;
           if (stats) {
             if (stats.current_streak !== undefined) {
               setCurrentStreakAPI(stats.current_streak);
@@ -220,7 +226,7 @@ const App: React.FC = () => {
   const handleLogin = async (email: string, pass: string) => {
     try {
       const response = await apiClient.login(email, pass);
-      const user: User = { 
+      const user: User = {
         email: response.user.email,
         name: response.user.full_name,
         age: response.user.age || 0,
@@ -273,7 +279,7 @@ const App: React.FC = () => {
       setAuthError("Signup failed. Please try again.");
     }
   };
-  
+
   const handleLogout = () => {
     setCurrentUser(null);
     setCurrentPage('login');
@@ -290,7 +296,7 @@ const App: React.FC = () => {
 
   const handleAssessmentComplete = async (result: AssessmentResult, answers: number[]) => {
     setAssessmentResult(result);
-    
+
     // Map answers to API format
     const answersMap: Record<string, string> = {};
     answers.forEach((answer, index) => {
@@ -304,15 +310,15 @@ const App: React.FC = () => {
         result.score,
         result.recommendations.map(r => r.title)
       );
-      
+
       const newAssessment: Assessment = {
-        id: Number(savedAssessment.id.replace('assessment_', '')),
+        id: savedAssessment.id,
         date: savedAssessment.created_at,
         score: savedAssessment.score,
         level: savedAssessment.stress_level as StressLevel,
         responses: answers
       };
-      
+
       setAssessmentHistory(prev => [...prev, newAssessment]);
       if (currentUser) {
         setStreak(updateStreak(currentUser.email));
@@ -321,24 +327,24 @@ const App: React.FC = () => {
       console.error('Error saving assessment:', error);
       // Still show results even if save fails
     }
-    
+
     setCurrentPage('results');
   };
 
-  const handleSaveJournalEntry = async (entry: { id?: number; content: string }) => {
+  const handleSaveJournalEntry = async (entry: { id?: string; content: string }) => {
     try {
       if (entry.id) {
         // Update existing journal entry
         const updated = await apiClient.updateJournal(
-          `journal_${entry.id}`,
+          entry.id,
           undefined,
           entry.content
         );
-        
-        setJournalEntries(prev => prev.map(e => e.id === entry.id ? { 
-          ...e, 
-          content: entry.content, 
-          date: updated.updated_at 
+
+        setJournalEntries(prev => prev.map(e => e.id === entry.id ? {
+          ...e,
+          content: entry.content,
+          date: updated.updated_at
         } : e));
       } else {
         // Create new journal entry
@@ -346,16 +352,21 @@ const App: React.FC = () => {
           'Untitled',
           entry.content
         );
-        
+
         const newEntry: JournalEntry = {
-          id: Number(newJournal.id.replace('journal_', '')),
+          id: newJournal.id,
           date: newJournal.created_at,
-          content: newJournal.content
+          content: newJournal.content,
+          title: newJournal.title,
+          mood: newJournal.mood,
+          user_id: newJournal.user_id,
+          created_at: newJournal.created_at,
+          updated_at: newJournal.updated_at
         };
-        
+
         setJournalEntries(prev => [newEntry, ...prev]);
       }
-      
+
       if (currentUser) {
         setStreak(updateStreak(currentUser.email));
       }
@@ -371,25 +382,25 @@ const App: React.FC = () => {
         log.intensity || 5,
         log.note
       );
-      
+
       const newLog: MoodLog = {
         ...log,
-        id: Number(savedLog.id.replace('mood_', '')),
+        id: savedLog.id,
         date: savedLog.created_at,
       };
-      
+
       setMoodLogs(prev => [newLog, ...prev]);
-      
+
       if (currentUser) {
         setStreak(updateStreak(currentUser.email));
       }
-      
+
       handleNavigate('dashboard');
     } catch (error) {
       console.error('Error saving mood log:', error);
     }
   };
-  
+
   const renderPage = () => {
     // Don't render anything until we've checked authentication
     if (!isAuthInitialized) {
@@ -404,14 +415,14 @@ const App: React.FC = () => {
     }
 
     if (!currentUser) {
-        switch (currentPage) {
-            case 'login':
-                return <Login onLogin={handleLogin} onNavigate={handleNavigate} error={authError} />;
-            case 'signup':
-                return <Signup onSignup={handleSignup} onNavigate={handleNavigate} error={authError} />;
-            default:
-                 return <Login onLogin={handleLogin} onNavigate={handleNavigate} error={authError} />;
-        }
+      switch (currentPage) {
+        case 'login':
+          return <Login onLogin={handleLogin} onNavigate={handleNavigate} error={authError} />;
+        case 'signup':
+          return <Signup onSignup={handleSignup} onNavigate={handleNavigate} error={authError} />;
+        default:
+          return <Login onLogin={handleLogin} onNavigate={handleNavigate} error={authError} />;
+      }
     }
 
     switch (currentPage) {
@@ -428,12 +439,14 @@ const App: React.FC = () => {
         return <ThoughtReframer onNavigate={handleNavigate} />;
       case 'profile':
         return <Profile user={currentUser} assessmentHistory={assessmentHistory} moodLogs={moodLogs} theme={theme} onNavigate={handleNavigate} breathingSessions={breathingSessions} currentStreak={currentStreakAPI} longestStreak={longestStreakAPI} />;
-       case 'journal':
+      case 'journal':
         return <Journal entries={journalEntries} onSave={handleSaveJournalEntry} onNavigate={handleNavigate} />;
       case 'music':
         return <MusicPlayer onNavigate={handleNavigate} />;
       case 'mood-tracker':
         return <MoodTracker onSave={handleSaveMoodLog} onNavigate={handleNavigate} />;
+      case 'feedback':
+        return <FeedbackForm user={currentUser} onNavigate={handleNavigate} />;
       default:
         const defaultTodaysMood = moodLogs.find(log => new Date(log.date).toDateString() === new Date().toDateString());
         return <Dashboard onNavigate={handleNavigate} quote={quote} streak={streak} user={currentUser} todayMood={defaultTodaysMood || null} />;
@@ -445,7 +458,7 @@ const App: React.FC = () => {
       <Header onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} theme={theme} setTheme={setTheme} />
       <main className="p-4 sm:p-6 lg:p-8">
         <div key={currentPage} className="page-animate">
-            {renderPage()}
+          {renderPage()}
         </div>
       </main>
       {currentUser && <FloatingChatBot />}
