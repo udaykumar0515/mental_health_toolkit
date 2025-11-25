@@ -130,9 +130,9 @@ const App: React.FC = () => {
 
           const user: User = {
             email: profile.user.email,
-            name: profile.user.name,
+            name: profile.user.full_name,
             age: profile.user.age || 0,
-            gender: profile.user.gender || 'prefer-not-to-say'
+            gender: (profile.user.gender as Gender) || 'prefer-not-to-say'
           };
           setCurrentUser(user);
           await loadUserData(user);

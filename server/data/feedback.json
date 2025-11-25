@@ -1,0 +1,22 @@
+[
+  {
+    "id": "feedback_cdcdc110-c26b-401c-b803-84bb8f1377a2",
+    "user_id": "anonymous",
+    "email": "udaykumarhaibathi@gmail.com",
+    "name": "uday",
+    "content": "nothing",
+    "rating": 4,
+    "category": "general",
+    "created_at": "2025-11-24T10:00:38.845Z"
+  },
+  {
+    "id": "feedback_1764002713503",
+    "user_id": "anonymous",
+    "email": "udaykumarhaibathi@gmail.com",
+    "name": "uday",
+    "content": "better bot",
+    "rating": 3,
+    "category": "feature",
+    "created_at": "2025-11-24T16:45:13.503Z"
+  }
+]

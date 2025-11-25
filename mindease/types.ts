@@ -92,7 +92,7 @@ export interface ProfileStats {
 }
 
 export interface ProfileResponse {
-  user: User;
+  user: UserResponse;
   assessments: any[]; // You might want to type this properly if you have the Assessment type on the server side matching the client side
   stats: ProfileStats;
   breathingSessions: BreathingSession[];
