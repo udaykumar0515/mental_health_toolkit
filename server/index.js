@@ -1,6 +1,18 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load .env with explicit path
+dotenv.config({ path: path.join(__dirname, '.env') });
+
+// Debug: Verify env vars are loaded
+console.log('🔑 GEMINI_API_KEY loaded:', process.env.GEMINI_API_KEY ? 'Yes (starts with ' + process.env.GEMINI_API_KEY.substring(0, 8) + '...)' : 'NO!');
+
 import { initializeFiles, readAssessments } from './database.js';
 import { exportAssessmentsToCSV } from './utils/csvExport.js';
 import authRoutes from './routes/auth.js';
@@ -14,8 +26,8 @@ import streaksRoutes from './routes/streaks.js';
 import musicRoutes from './routes/music.js';
 import exportRoutes from './routes/export.js';
 import feedbackRoutes from './routes/feedback.js';
-
-dotenv.config();
+import aiRoutes from './routes/ai.js';
+import quotesRoutes from './routes/quotes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -50,6 +62,8 @@ app.use('/api/streaks', streaksRoutes);
 app.use('/api/music', musicRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/feedback', feedbackRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/quotes', quotesRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
