@@ -227,7 +227,7 @@ const Profile: React.FC<ProfileProps> = ({ user, assessmentHistory, moodLogs, th
                     <div className="bg-gradient-to-br from-white/80 to-slate-50/80 dark:from-gray-800/50 dark:to-gray-900/50 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-slate-200 dark:border-gray-700">
                         <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-6">Recent Breathing Sessions</h3>
                         <div className="space-y-3 max-h-80 overflow-y-auto">
-                            {breathingSessions.slice().reverse().slice(0, 8).map(session => (
+                            {breathingSessions.slice().sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 8).map(session => (
                                 <div key={session.id} className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl border border-blue-200 dark:border-blue-700/50 hover:shadow-md transition">
                                     <div className="flex justify-between items-start">
                                         <div>

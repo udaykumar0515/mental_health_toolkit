@@ -158,19 +158,33 @@ router.post('/analyze-assessment', async (req, res) => {
 
     const answersText = answers.map(a => `- ${a.question}: ${a.answer} (value: ${a.value})`).join('\n');
     
-    const prompt = `A user has completed a stress assessment. Please analyze their answers to determine their stress level.
-The scoring is as follows for questions 1, 2, 3, 6, 9, 10: Never=0, Almost Never=1, Sometimes=2, Fairly Often=3, Very Often=4.
-For questions 4, 5, 7, 8, 12, the scoring is reversed: Never=4, Almost Never=3, Sometimes=2, Fairly Often=1, Very Often=0.
-Question 11 is informational and not scored.
+    const prompt = `You are a stress assessment analyzer. Analyze the user's answers and return ONLY a valid JSON object, no other text.
 
-Calculate the total score. Based on the score, determine the stress level: 0-12 is Low, 13-24 is Mild, 25-36 is Moderate, 37-48 is High.
+SCORING RULES:
+- Questions 1, 2, 3, 6, 9, 10: Never=0, Almost Never=1, Sometimes=2, Fairly Often=3, Very Often=4
+- Questions 4, 5, 7, 8, 12: Never=4, Almost Never=3, Sometimes=2, Fairly Often=1, Very Often=0
+- Question 11 is informational (not scored)
 
-Provide an empathetic summary and personalized recommendations based on their answers and stress level.
+STRESS LEVELS:
+- 0-12: Low
+- 13-24: Mild  
+- 25-36: Moderate
+- 37-48: High
 
 User's answers:
 ${answersText}
 
-Return the analysis as JSON: {"score": number, "level": "string", "summary": "string", "recommendations": [{"title": "string", "description": "string"}]}`;
+INSTRUCTIONS:
+1. Calculate the total score
+2. Determine stress level
+3. Write a brief 2-3 sentence empathetic summary
+4. Provide 3-4 recommendations, each with:
+   - title: Short title (3-5 words)
+   - description: Brief one-liner summary (10-15 words max)
+   - details: Detailed explanation with actionable steps (2-4 sentences)
+
+RESPOND WITH ONLY THIS JSON FORMAT (no markdown, no explanation):
+{"score": <number>, "level": "<Low|Mild|Moderate|High>", "summary": "<brief summary>", "recommendations": [{"title": "<short title>", "description": "<brief one-liner>", "details": "<detailed explanation with steps>"}]}`;
 
     const response = await callGemini(prompt);
     

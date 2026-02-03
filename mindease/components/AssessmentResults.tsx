@@ -130,10 +130,10 @@ const AssessmentResults: React.FC<AssessmentResultsProps> = ({ result, onNavigat
         {/* Flashcard-Style Recommendations */}
         <div className="space-y-4 mb-8">
           {displayedRecommendations.map((rec, index) => {
-            const fullText = rec.description;
-            const summaryText = getFirstSentence(fullText);
-            // Extract rest of text after first sentence to avoid duplication
-            const restOfText = fullText.substring(summaryText.length).trim();
+            // Use separate description and details fields from API
+            // Fallback to old behavior if details not present
+            const summaryText = rec.description;
+            const detailsText = (rec as any).details || '';
             
             return (
               <div
@@ -157,26 +157,28 @@ const AssessmentResults: React.FC<AssessmentResultsProps> = ({ result, onNavigat
                         expanded[index] ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
                       }`}
                     >
-                      {restOfText && (
+                      {detailsText && (
                         <div className="mt-4 pt-4 border-t border-slate-200 dark:border-gray-700 animate-fadeIn">
                           <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                            {restOfText}
+                            {detailsText}
                           </p>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* More Button */}
-                  <button
-                    className="px-3 py-1 font-semibold text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-300 whitespace-nowrap flex-shrink-0"
-                    onClick={e => {
-                      e.stopPropagation();
-                      toggleExpanded(index);
-                    }}
-                  >
-                    {expanded[index] ? 'Less' : 'More'}
-                  </button>
+                  {/* More Button - only show if there are details */}
+                  {detailsText && (
+                    <button
+                      className="px-3 py-1 font-semibold text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-300 whitespace-nowrap flex-shrink-0"
+                      onClick={e => {
+                        e.stopPropagation();
+                        toggleExpanded(index);
+                      }}
+                    >
+                      {expanded[index] ? 'Less' : 'More'}
+                    </button>
+                  )}
                 </div>
               </div>
             );

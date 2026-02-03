@@ -2,21 +2,45 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createChatSession } from '../services/geminiService';
 import { MessageSquare, User, Send } from 'lucide-react';
 import { ChatMessage } from '../types';
-import { Chat, GenerateContentResponse } from '@google/genai';
+
+// Interface for our chat session (from geminiService)
+interface ChatSession {
+  sendMessage: (message: string) => Promise<{ text: string }>;
+}
 
 const FloatingChatBot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [chatSession, setChatSession] = useState<Chat | null>(null);
+  const [chatSession, setChatSession] = useState<ChatSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(scrollToBottom, [messages]);
+
+  // Click outside handler - close chat when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!isOpen) return;
+      
+      const target = event.target as Node;
+      const clickedInsideChat = chatContainerRef.current?.contains(target);
+      const clickedOnButton = buttonRef.current?.contains(target);
+      
+      if (!clickedInsideChat && !clickedOnButton) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
 
   const startChat = useCallback(() => {
     const session = createChatSession();
@@ -35,24 +59,15 @@ const FloatingChatBot: React.FC = () => {
 
     const userMessage: ChatMessage = { sender: 'user', text: input };
     setMessages(prev => [...prev, userMessage]);
+    const userInput = input;
     setInput('');
     setIsLoading(true);
 
     try {
-      const stream = await chatSession.sendMessageStream({ message: input });
-      let botResponse = '';
+      // Use sendMessage (not sendMessageStream) - this is our backend-connected implementation
+      const response = await chatSession.sendMessage(userInput);
       
-      setMessages(prev => [...prev, { sender: 'bot', text: '' }]);
-
-      for await (const chunk of stream) {
-        const chunkText = (chunk as GenerateContentResponse).text;
-        botResponse += chunkText;
-        setMessages(prev => {
-          const newMessages = [...prev];
-          newMessages[newMessages.length - 1].text = botResponse;
-          return newMessages;
-        });
-      }
+      setMessages(prev => [...prev, { sender: 'bot', text: response.text }]);
     } catch (err) {
       console.error("Error sending message:", err);
       setMessages(prev => [...prev, { sender: 'bot', text: "I'm having a little trouble connecting right now. Please try again in a moment." }]);
@@ -65,6 +80,7 @@ const FloatingChatBot: React.FC = () => {
     <>
       {/* Floating Button */}
       <button
+        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-6 right-6 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-110 z-40"
         aria-label="Open CalmBot chat"
@@ -74,7 +90,10 @@ const FloatingChatBot: React.FC = () => {
 
       {/* Chat Modal */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-96 h-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col border border-slate-200 dark:border-gray-700 z-50">
+        <div 
+          ref={chatContainerRef}
+          className="fixed bottom-24 right-6 w-96 h-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col border border-slate-200 dark:border-gray-700 z-50"
+        >
           {/* Header */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -105,6 +124,14 @@ const FloatingChatBot: React.FC = () => {
                 {msg.sender === 'user' && <div className="bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400 rounded-full p-1.5 flex-shrink-0"><User size={16} /></div>}
               </div>
             ))}
+            {isLoading && (
+              <div className="flex items-start gap-2">
+                <div className="bg-gray-200 dark:bg-gray-700 rounded-full p-1.5 flex-shrink-0"><MessageSquare size={16} /></div>
+                <div className="bg-gray-200 dark:bg-gray-700 p-2.5 rounded-lg text-sm">
+                  <span className="animate-pulse">Thinking...</span>
+                </div>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
 

@@ -2,14 +2,18 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createChatSession } from '../services/geminiService';
 import { MessageSquare, User, Send, ArrowLeft } from 'lucide-react';
 import { ChatMessage, Page } from '../types';
-import { Chat, GenerateContentResponse } from '@google/genai';
+
+// Interface for our chat session (from geminiService)
+interface ChatSession {
+  sendMessage: (message: string) => Promise<{ text: string }>;
+}
 
 interface CalmBotProps {
     onNavigate: (page: Page) => void;
 }
 
 const CalmBot: React.FC<CalmBotProps> = ({ onNavigate }) => {
-  const [chatSession, setChatSession] = useState<Chat | null>(null);
+  const [chatSession, setChatSession] = useState<ChatSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -37,26 +41,14 @@ const CalmBot: React.FC<CalmBotProps> = ({ onNavigate }) => {
 
     const userMessage: ChatMessage = { sender: 'user', text: input };
     setMessages(prev => [...prev, userMessage]);
+    const userInput = input;
     setInput('');
     setIsLoading(true);
 
     try {
-        const stream = await chatSession.sendMessageStream({ message: input });
-        let botResponse = '';
-        
-        // Add a placeholder for the bot's message to update it as chunks stream in
-        setMessages(prev => [...prev, { sender: 'bot', text: '' }]);
-
-        for await (const chunk of stream) {
-            const chunkText = (chunk as GenerateContentResponse).text;
-            botResponse += chunkText;
-            setMessages(prev => {
-                const newMessages = [...prev];
-                newMessages[newMessages.length - 1].text = botResponse;
-                return newMessages;
-            });
-        }
-
+      // Use sendMessage (not sendMessageStream) - this is our backend-connected implementation
+      const response = await chatSession.sendMessage(userInput);
+      setMessages(prev => [...prev, { sender: 'bot', text: response.text }]);
     } catch (err) {
       console.error("Error sending message:", err);
       setMessages(prev => [...prev, { sender: 'bot', text: "I'm having a little trouble connecting right now. Please try again in a moment." }]);
@@ -93,6 +85,14 @@ const CalmBot: React.FC<CalmBotProps> = ({ onNavigate }) => {
                          {msg.sender === 'user' && <div className="bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400 rounded-full p-2"><User size={18} /></div>}
                     </div>
                 ))}
+                {isLoading && (
+                  <div className="flex items-start gap-3">
+                    <div className="bg-gray-200 dark:bg-gray-700 rounded-full p-2"><MessageSquare size={18} /></div>
+                    <div className="bg-gray-200 dark:bg-gray-700 p-3 rounded-2xl rounded-bl-none">
+                      <span className="animate-pulse">Thinking...</span>
+                    </div>
+                  </div>
+                )}
                 <div ref={messagesEndRef} />
             </div>
             <div className="p-4 border-t border-gray-200 dark:border-gray-700">
