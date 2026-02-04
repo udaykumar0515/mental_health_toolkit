@@ -27,10 +27,24 @@ const Profile: React.FC<ProfileProps> = ({ user, assessmentHistory, moodLogs, th
     const [saveError, setSaveError] = useState<string | null>(null);
     const [saveSuccess, setSaveSuccess] = useState(false);
 
-    const chartData = assessmentHistory.map(a => ({
-        name: new Date(a.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        score: Math.round((a.score / 48) * 10) || 1,
-    }));
+    // Sort assessments by date for the chart
+    const sortedHistory = [...assessmentHistory].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    let lastDate = '';
+    const chartData = sortedHistory.map(a => {
+        const dateObj = new Date(a.date);
+        const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const timeStr = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        
+        const showLabel = dateStr !== lastDate;
+        if (showLabel) lastDate = dateStr;
+
+        return {
+            name: showLabel ? dateStr : '', 
+            fullLabel: `${dateStr} at ${timeStr}`,
+            score: Math.round((a.score / 48) * 10) || 1, 
+        };
+    });
 
     const moodDistribution = moodLogs.reduce((acc, log) => {
         acc[log.mood] = (acc[log.mood] || 0) + 1;
@@ -269,23 +283,48 @@ const Profile: React.FC<ProfileProps> = ({ user, assessmentHistory, moodLogs, th
                 <div className="bg-gradient-to-br from-white/80 to-slate-50/80 dark:from-gray-800/50 dark:to-gray-900/50 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-slate-200 dark:border-gray-700 lg:col-span-2">
                     <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-6">Stress Score Over Time</h3>
                     {assessmentHistory.length > 1 ? (
-                        <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke={chartGridColor} />
-                                <XAxis dataKey="name" stroke={chartTextColor} />
-                                <YAxis domain={[0, 10]} stroke={chartTextColor} />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: theme === 'dark' ? '#2d3748' : 'white',
-                                        border: '1px solid',
-                                        borderColor: theme === 'dark' ? '#4a5568' : '#e2e8f0',
-                                        borderRadius: '0.5rem',
-                                    }}
-                                />
-                                <Legend wrapperStyle={{ color: chartTextColor }} />
-                                <Line type="monotone" dataKey="score" stroke="#3b82f6" strokeWidth={3} activeDot={{ r: 8 }} dot={{ fill: '#3b82f6', r: 5 }} />
-                            </LineChart>
-                        </ResponsiveContainer>
+                        <>
+                            <div className="overflow-x-auto pb-4 custom-scrollbar">
+                                <div style={{ minWidth: Math.max(100, chartData.length * 60) + 'px', minHeight: '300px' }}>
+                                    <ResponsiveContainer width="100%" height={300}>
+                                        <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke={chartGridColor} vertical={false} />
+                                            <XAxis dataKey="name" stroke={chartTextColor} tickLine={false} />
+                                            <YAxis domain={[0, 10]} stroke={chartTextColor} />
+                                            <Tooltip
+                                                labelFormatter={(value, payload) => {
+                                                    if (payload && payload.length > 0) {
+                                                        return payload[0].payload.fullLabel;
+                                                    }
+                                                    return value;
+                                                }}
+                                                contentStyle={{
+                                                    backgroundColor: theme === 'dark' ? '#2d3748' : 'white',
+                                                    border: '1px solid',
+                                                    borderColor: theme === 'dark' ? '#4a5568' : '#e2e8f0',
+                                                    borderRadius: '0.5rem',
+                                                }}
+                                            />
+
+                                            <Line
+                                                type="monotone"
+                                                dataKey="score"
+                                                name="Stress Level (1-10)"
+                                                stroke="#ef4444"
+                                                strokeWidth={3}
+                                                activeDot={{ r: 8 }}
+                                            />
+                                        </LineChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+                            <div className="flex justify-center mt-2">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-1 bg-red-500 rounded-full"></div>
+                                    <span className="text-sm font-medium text-slate-600 dark:text-slate-300">Stress Level (1-10)</span>
+                                </div>
+                            </div>
+                        </>
                     ) : (
                         <p className="text-center text-slate-500 dark:text-slate-400 py-16">Complete at least two assessments to see your progress chart.</p>
                     )}
