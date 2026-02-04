@@ -9,6 +9,7 @@ import { AuthResponse, User, Question, Assessment, JournalEntry, MoodLog, Breath
 import { getIdToken, auth } from '../firebase';
 
 const API_BASE_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
+console.log('🌐 API Client initialized with URL:', API_BASE_URL);
 
 class ApiClient {
   private cachedToken: string | null = null;

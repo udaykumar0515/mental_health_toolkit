@@ -19,10 +19,28 @@ const serviceAccountPath = join(__dirname, 'firebase-service-account.json');
 let serviceAccount;
 
 try {
-  serviceAccount = JSON.parse(readFileSync(serviceAccountPath, 'utf8'));
+  // Option 1: Load from Environment Variable (Best for Production/Render/Heroku)
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    console.log('✅ Loaded Firebase credentials from environment variable');
+  } 
+  // Option 2: Load from Individual Environment Variables (Easier for some platforms)
+  else if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+    serviceAccount = {
+      project_id: process.env.FIREBASE_PROJECT_ID,
+      client_email: process.env.FIREBASE_CLIENT_EMAIL,
+      private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'), // Handle newlines
+    };
+    console.log('✅ Loaded Firebase credentials from individual env vars');
+  }
+  // Option 3: Load from local file (Best for Local Development)
+  else {
+    serviceAccount = JSON.parse(readFileSync(serviceAccountPath, 'utf8'));
+    console.log('✅ Loaded Firebase credentials from local file');
+  }
 } catch (error) {
-  console.error('❌ Failed to load Firebase service account:', error.message);
-  console.error('   Make sure firebase-service-account.json exists in the server folder');
+  console.error('❌ Failed to load Firebase credentials:', error.message);
+  console.error('   Ensure FIREBASE_SERVICE_ACCOUNT env var is set OR individual vars (FIREBASE_PROJECT_ID, etc) OR firebase-service-account.json exists.');
   process.exit(1);
 }
 
