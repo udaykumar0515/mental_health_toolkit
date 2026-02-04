@@ -8,6 +8,7 @@ import {
 } from '../firebase';
 import { apiClient } from '../services/apiClient';
 import { Gender } from '../types';
+import { Sparkles, Heart } from 'lucide-react';
 
 interface AuthPageProps {
   onAuthSuccess: (user: { email: string; name: string; age: number; gender: string }) => void;
@@ -256,9 +257,17 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
   if (mode === 'login') {
     return (
       <div className="max-w-md mx-auto mt-10">
-        <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg text-center">
-          <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">Welcome Back!</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">Sign in to continue your journey.</p>
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-8 rounded-3xl shadow-2xl text-center border border-white/20 dark:border-gray-700/30">
+          <div className="mb-6">
+            <h1 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-teal-400 mb-2">MindEase</h1>
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 bg-gradient-to-tr from-blue-100 to-teal-100 dark:from-blue-900/50 dark:to-teal-900/50 rounded-2xl flex items-center justify-center transform rotate-3 shadow-lg">
+                <Sparkles className="w-8 h-8 text-blue-500 dark:text-teal-400" />
+              </div>
+            </div>
+            <p className="text-xl font-bold text-slate-800 dark:text-white">Hello! I'm Mindy.</p>
+            <p className="text-slate-600 dark:text-slate-300 mt-1">Let's check in on how you're feeling today.</p>
+          </div>
           
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
           
@@ -340,9 +349,17 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
   // Signup Screen
   return (
     <div className="max-w-md mx-auto mt-10">
-      <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg text-center">
-        <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">Create Your Account</h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">Start your path to a calmer mind today.</p>
+      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-8 rounded-3xl shadow-2xl text-center border border-white/20 dark:border-gray-700/30">
+        <div className="mb-6">
+          <h1 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-teal-400 mb-2">MindEase</h1>
+           <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 bg-gradient-to-tr from-purple-100 to-pink-100 dark:from-purple-900/50 dark:to-pink-900/50 rounded-2xl flex items-center justify-center transform -rotate-3 shadow-lg">
+                <Heart className="w-8 h-8 text-purple-500 dark:text-pink-400" />
+              </div>
+            </div>
+          <p className="text-xl font-bold text-slate-800 dark:text-white">Nice to meet you!</p>
+          <p className="text-slate-600 dark:text-slate-300 mt-1">I'm excited to start this journey with you.</p>
+        </div>
         
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
         
