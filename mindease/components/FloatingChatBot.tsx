@@ -82,7 +82,7 @@ const FloatingChatBot: React.FC = () => {
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-110 z-40"
+        className="fixed bottom-6 right-4 sm:right-6 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-110 z-40"
         aria-label="Open CalmBot chat"
       >
         <MessageSquare size={24} />
@@ -92,7 +92,7 @@ const FloatingChatBot: React.FC = () => {
       {isOpen && (
         <div 
           ref={chatContainerRef}
-          className="fixed bottom-24 right-6 w-96 h-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col border border-slate-200 dark:border-gray-700 z-50"
+          className="fixed bottom-24 right-4 left-4 sm:left-auto sm:right-6 w-auto sm:w-96 h-[500px] max-h-[70vh] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col border border-slate-200 dark:border-gray-700 z-50 transform transition-all duration-300 ease-in-out"
         >
           {/* Header */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
