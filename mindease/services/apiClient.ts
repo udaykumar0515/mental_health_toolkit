@@ -51,25 +51,7 @@ class ApiClient {
     this.cachedToken = null;
   }
 
-  // Legacy methods for backward compatibility during transition
-  setToken(token: string) {
-    if (token === '') {
-      this.cachedToken = null;
-      localStorage.removeItem('auth_token');
-    } else {
-      this.cachedToken = token;
-      localStorage.setItem('auth_token', token);
-    }
-  }
 
-  getToken(): string | null {
-    // First check Firebase
-    if (auth.currentUser) {
-      return this.cachedToken;
-    }
-    // Fallback to localStorage for transition
-    return localStorage.getItem('auth_token');
-  }
 
   private async getHeaders(): Promise<Record<string, string>> {
     const headers: Record<string, string> = {
@@ -143,11 +125,7 @@ class ApiClient {
     return response.json();
   }
 
-  // Deprecated: Use Firebase SDK for login instead
-  async login(email: string, password: string): Promise<AuthResponse> {
-    console.warn('apiClient.login is deprecated. Use Firebase signInWithEmail instead.');
-    throw new Error('Use Firebase SDK for login');
-  }
+
 
   // ===== Questions =====
   async getQuestions(): Promise<Question[]> {
