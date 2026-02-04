@@ -1,10 +1,16 @@
+/**
+ * Feedback Routes
+ * 
+ * Handles user feedback submission.
+ */
+
 import express from 'express';
 import { createFeedback } from '../database.js';
 
 const router = express.Router();
 
 // Submit feedback
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
     try {
         const { user_id, email, name, content, rating, category } = req.body;
 
@@ -23,7 +29,7 @@ router.post('/', (req, res) => {
             created_at: new Date().toISOString()
         };
 
-        const savedFeedback = createFeedback(newFeedback);
+        const savedFeedback = await createFeedback(newFeedback);
         res.status(201).json(savedFeedback);
     } catch (error) {
         console.error('Error submitting feedback:', error);

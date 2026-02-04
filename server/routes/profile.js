@@ -1,26 +1,30 @@
+/**
+ * Profile Routes
+ * 
+ * Handles user profile data and statistics.
+ */
+
 import express from 'express';
-import { authenticateToken } from './auth.js';
+import { verifyFirebaseToken } from '../middleware/auth.js';
 import { getUserData } from '../auth.js';
-import { getUserAssessments, getUserBreathingSessions, readMoodLogs, readJournals, findUserById } from '../database.js';
+import { getUserAssessments, getUserBreathingSessions, getUserMoodLogs, getUserJournals, findUserById } from '../database.js';
 
 const router = express.Router();
 
 // GET /api/profile/data
-router.get('/data', authenticateToken, (req, res) => {
+router.get('/data', verifyFirebaseToken, async (req, res) => {
   try {
-    const user = getUserData(req.userId);
+    const user = await getUserData(req.user.uid);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const assessments = getUserAssessments(req.userId);
-    const breathingSessions = getUserBreathingSessions(req.userId);
-    const allMoodLogs = readMoodLogs();
-    const userMoodLogs = allMoodLogs.filter(l => l.user_id === req.userId);
-    const allJournals = readJournals();
-    const userJournals = allJournals.filter(j => j.user_id === req.userId);
-    const fullUser = findUserById(req.userId);
+    const assessments = await getUserAssessments(req.user.uid);
+    const breathingSessions = await getUserBreathingSessions(req.user.uid);
+    const userMoodLogs = await getUserMoodLogs(req.user.uid);
+    const userJournals = await getUserJournals(req.user.uid);
+    const fullUser = await findUserById(req.user.uid);
     
     // Calculate stats
     const totalAssessments = assessments.length;

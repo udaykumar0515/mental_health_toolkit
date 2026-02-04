@@ -1,11 +1,17 @@
+/**
+ * Journal Routes
+ * 
+ * Handles journal entries for the user.
+ */
+
 import express from 'express';
-import { authenticateToken } from './auth.js';
-import { createJournal, getUserJournals, updateJournal, deleteJournal } from '../database.js';
+import { verifyFirebaseToken } from '../middleware/auth.js';
+import { createJournal, getUserJournals, updateJournal, deleteJournal, getJournalById } from '../database.js';
 
 const router = express.Router();
 
 // POST /api/journals - Save a new journal entry
-router.post('/', authenticateToken, (req, res) => {
+router.post('/', verifyFirebaseToken, async (req, res) => {
   try {
     const { title, content, mood } = req.body;
 
@@ -15,7 +21,7 @@ router.post('/', authenticateToken, (req, res) => {
 
     const journal = {
       id: `journal_${Date.now()}`,
-      user_id: req.userId,
+      user_id: req.user.uid,
       title: title || 'Untitled',
       content,
       mood: mood || 'neutral',
@@ -23,8 +29,8 @@ router.post('/', authenticateToken, (req, res) => {
       updated_at: new Date().toISOString()
     };
 
-    createJournal(journal);
-    res.status(201).json(journal);
+    const savedJournal = await createJournal(journal);
+    res.status(201).json(savedJournal);
   } catch (error) {
     console.error('Error creating journal:', error);
     res.status(500).json({ message: error.message });
@@ -32,9 +38,9 @@ router.post('/', authenticateToken, (req, res) => {
 });
 
 // GET /api/journals - Get all journals for the authenticated user
-router.get('/', authenticateToken, (req, res) => {
+router.get('/', verifyFirebaseToken, async (req, res) => {
   try {
-    const journals = getUserJournals(req.userId);
+    const journals = await getUserJournals(req.user.uid);
     res.status(200).json(journals);
   } catch (error) {
     console.error('Error fetching journals:', error);
@@ -43,16 +49,25 @@ router.get('/', authenticateToken, (req, res) => {
 });
 
 // PUT /api/journals/:id - Update a journal entry
-router.put('/:id', authenticateToken, (req, res) => {
+router.put('/:id', verifyFirebaseToken, async (req, res) => {
   try {
     const { title, content, mood } = req.body;
+
+    // Verify ownership
+    const journal = await getJournalById(req.params.id);
+    if (!journal) {
+      return res.status(404).json({ message: 'Journal entry not found' });
+    }
+    if (journal.user_id !== req.user.uid) {
+      return res.status(403).json({ message: 'Not authorized to update this journal' });
+    }
 
     const updates = {};
     if (title !== undefined) updates.title = title;
     if (content !== undefined) updates.content = content;
     if (mood !== undefined) updates.mood = mood;
 
-    const updated = updateJournal(req.params.id, updates);
+    const updated = await updateJournal(req.params.id, updates);
 
     if (!updated) {
       return res.status(404).json({ message: 'Journal entry not found' });
@@ -66,9 +81,18 @@ router.put('/:id', authenticateToken, (req, res) => {
 });
 
 // DELETE /api/journals/:id - Delete a journal entry
-router.delete('/:id', authenticateToken, (req, res) => {
+router.delete('/:id', verifyFirebaseToken, async (req, res) => {
   try {
-    deleteJournal(req.params.id);
+    // Verify ownership
+    const journal = await getJournalById(req.params.id);
+    if (!journal) {
+      return res.status(404).json({ message: 'Journal entry not found' });
+    }
+    if (journal.user_id !== req.user.uid) {
+      return res.status(403).json({ message: 'Not authorized to delete this journal' });
+    }
+
+    await deleteJournal(req.params.id);
     res.status(200).json({ message: 'Journal entry deleted successfully' });
   } catch (error) {
     console.error('Error deleting journal:', error);

@@ -1,11 +1,17 @@
+/**
+ * Breathing Session Routes
+ * 
+ * Handles breathing exercise session tracking.
+ */
+
 import express from 'express';
-import { authenticateToken } from './auth.js';
+import { verifyFirebaseToken } from '../middleware/auth.js';
 import { createBreathingSession, getUserBreathingSessions } from '../database.js';
 
 const router = express.Router();
 
 // POST /api/breathing/sessions
-router.post('/sessions', authenticateToken, (req, res) => {
+router.post('/sessions', verifyFirebaseToken, async (req, res) => {
   try {
     const { duration_seconds, cycles_completed } = req.body;
 
@@ -15,13 +21,13 @@ router.post('/sessions', authenticateToken, (req, res) => {
 
     const session = {
       id: `breathing_${Date.now()}`,
-      user_id: req.userId,
+      user_id: req.user.uid,
       duration_seconds,
       cycles_completed,
       created_at: new Date().toISOString()
     };
 
-    createBreathingSession(session);
+    await createBreathingSession(session);
 
     res.status(201).json(session);
   } catch (error) {
@@ -31,9 +37,9 @@ router.post('/sessions', authenticateToken, (req, res) => {
 });
 
 // GET /api/breathing/sessions
-router.get('/sessions', authenticateToken, (req, res) => {
+router.get('/sessions', verifyFirebaseToken, async (req, res) => {
   try {
-    const sessions = getUserBreathingSessions(req.userId);
+    const sessions = await getUserBreathingSessions(req.user.uid);
     const sorted = sessions.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     res.status(200).json(sorted);
   } catch (error) {

@@ -1,12 +1,18 @@
+/**
+ * Assessment Routes
+ * 
+ * Handles mental health assessment submissions and history.
+ */
+
 import express from 'express';
-import { authenticateToken } from './auth.js';
+import { verifyFirebaseToken } from '../middleware/auth.js';
 import { createAssessment, getUserAssessments, getLatestAssessment, readAssessments } from '../database.js';
 import { exportAssessmentsToCSV } from '../utils/csvExport.js';
 
 const router = express.Router();
 
 // POST /api/assessment/submit
-router.post('/submit', authenticateToken, (req, res) => {
+router.post('/submit', verifyFirebaseToken, async (req, res) => {
   try {
     const { answers, stress_level, score, recommendations } = req.body;
 
@@ -16,7 +22,7 @@ router.post('/submit', authenticateToken, (req, res) => {
 
     const assessment = {
       id: `assessment_${Date.now()}`,
-      user_id: req.userId,
+      user_id: req.user.uid,
       stress_level,
       score,
       answers,
@@ -24,10 +30,10 @@ router.post('/submit', authenticateToken, (req, res) => {
       created_at: new Date().toISOString()
     };
 
-    createAssessment(assessment);
+    await createAssessment(assessment);
     
     // Export all assessments to CSV
-    const allAssessments = readAssessments();
+    const allAssessments = await readAssessments();
     exportAssessmentsToCSV(allAssessments);
 
     res.status(201).json(assessment);
@@ -38,9 +44,9 @@ router.post('/submit', authenticateToken, (req, res) => {
 });
 
 // GET /api/assessment/history
-router.get('/history', authenticateToken, (req, res) => {
+router.get('/history', verifyFirebaseToken, async (req, res) => {
   try {
-    const assessments = getUserAssessments(req.userId);
+    const assessments = await getUserAssessments(req.user.uid);
     // Sort by date descending
     const sorted = assessments.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     res.status(200).json(sorted);
@@ -51,9 +57,9 @@ router.get('/history', authenticateToken, (req, res) => {
 });
 
 // GET /api/assessment/latest
-router.get('/latest', authenticateToken, (req, res) => {
+router.get('/latest', verifyFirebaseToken, async (req, res) => {
   try {
-    const assessment = getLatestAssessment(req.userId);
+    const assessment = await getLatestAssessment(req.user.uid);
 
     if (!assessment) {
       return res.status(404).json({ message: 'No assessments found' });

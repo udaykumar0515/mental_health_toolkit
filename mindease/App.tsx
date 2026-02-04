@@ -9,8 +9,7 @@ import ThoughtReframer from './components/ThoughtReframer';
 
 import FloatingChatBot from './components/FloatingChatBot';
 import Profile from './components/Profile';
-import Login from './components/Login';
-import Signup from './components/Signup';
+import AuthPage from './components/AuthPage';
 import Journal from './components/Journal';
 import MusicPlayer from './components/MusicPlayer';
 import MoodTracker from './components/MoodTracker';
@@ -19,6 +18,7 @@ import { Page, AssessmentResult, Assessment, User, JournalEntry, Theme, MoodLog,
 import { generateMotivationalQuote } from './services/geminiService';
 import { getStreak, updateStreak } from './utils/streaks';
 import { apiClient } from './services/apiClient';
+import { onAuthChange, logOut, auth } from './firebase';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('login');
@@ -115,28 +115,28 @@ const App: React.FC = () => {
     }
   };
 
-  // Check for logged in user on mount
+  // Listen for Firebase auth state changes
   useEffect(() => {
-    const initializeAuth = async () => {
-      const token = apiClient.getToken();
-      console.log('Auth initialization - Token present:', !!token);
-
-      if (token) {
-        // If we have a token, try to fetch profile
+    const unsubscribe = onAuthChange(async (firebaseUser) => {
+      console.log('Firebase auth state changed:', firebaseUser?.email || 'null');
+      
+      if (firebaseUser) {
+        // User is signed in
         try {
-          console.log('Attempting to validate token...');
-          const profile = await apiClient.getProfile();
-          console.log('Token valid, profile fetched:', profile);
-
+          // Sync with backend to get/create user profile
+          const userData = await apiClient.syncUser();
+          
           const user: User = {
-            email: profile.user.email,
-            name: profile.user.full_name,
-            age: profile.user.age || 0,
-            gender: (profile.user.gender as Gender) || 'prefer-not-to-say'
+            email: userData.email,
+            name: userData.full_name,
+            age: userData.age || 0,
+            gender: (userData.gender as Gender) || 'prefer-not-to-say'
           };
+          
           setCurrentUser(user);
           await loadUserData(user);
-          // Fetch quote immediately on page refresh
+          
+          // Fetch quote
           try {
             const motivationalQuote = await generateMotivationalQuote();
             setQuote(motivationalQuote);
@@ -144,23 +144,31 @@ const App: React.FC = () => {
             console.error("Error fetching quote:", error);
             setQuote({ quote: "The best way to predict the future is to create it.", author: "Peter Drucker" });
           }
+          
           setCurrentPage('dashboard');
         } catch (error) {
-          // Token is invalid, clear it and go to login
-          console.log('Token validation failed, clearing token and going to login');
-          apiClient.setToken('');
-          setCurrentPage('login');
-          setCurrentUser(null);
+          console.error('Error syncing user:', error);
+          // Still try to use Firebase user data
+          const user: User = {
+            email: firebaseUser.email || '',
+            name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+            age: 0,
+            gender: 'prefer-not-to-say'
+          };
+          setCurrentUser(user);
+          setCurrentPage('dashboard');
         }
       } else {
-        console.log('No token found, going to login');
-        setCurrentPage('login');
+        // User is signed out
         setCurrentUser(null);
+        setCurrentPage('login');
+        apiClient.clearToken();
       }
+      
       setIsAuthInitialized(true);
-    };
+    });
 
-    initializeAuth();
+    return () => unsubscribe();
   }, []);
 
   // Reload profile data when navigating to profile page
@@ -223,75 +231,48 @@ const App: React.FC = () => {
     }
   };
 
-  const handleLogin = async (email: string, pass: string) => {
+  // Handle successful authentication from AuthPage
+  const handleAuthSuccess = async (userData: { email: string; name: string; age: number; gender: string }) => {
+    const user: User = {
+      email: userData.email,
+      name: userData.name,
+      age: userData.age,
+      gender: userData.gender as Gender
+    };
+    
+    setCurrentUser(user);
+    await loadUserData(user);
+    
+    // Fetch quote
     try {
-      const response = await apiClient.login(email, pass);
-      const user: User = {
-        email: response.user.email,
-        name: response.user.full_name,
-        age: response.user.age || 0,
-        gender: (response.user.gender as Gender) || 'prefer-not-to-say'
-      };
-      setCurrentUser(user);
-      await loadUserData(user);
-      // Fetch quote immediately after login
-      try {
-        const motivationalQuote = await generateMotivationalQuote();
-        setQuote(motivationalQuote);
-      } catch (error) {
-        console.error("Error fetching quote:", error);
-        setQuote({ quote: "The best way to predict the future is to create it.", author: "Peter Drucker" });
-      }
-      setCurrentPage('dashboard');
-      setAuthError(null);
+      const motivationalQuote = await generateMotivationalQuote();
+      setQuote(motivationalQuote);
     } catch (error) {
-      setAuthError("Invalid email or password.");
+      console.error("Error fetching quote:", error);
+      setQuote({ quote: "The best way to predict the future is to create it.", author: "Peter Drucker" });
     }
+    
+    setCurrentPage('dashboard');
+    setAuthError(null);
   };
 
-  // Updated handleSignup to use API client
-  const handleSignup = async (userProfile: User & { pass: string }) => {
+  const handleLogout = async () => {
     try {
-      const response = await apiClient.signup(userProfile.email, userProfile.pass, userProfile.name, userProfile.age, userProfile.gender);
-      const newUser: User = {
-        email: response.user.email,
-        name: response.user.full_name,
-        age: response.user.age || 0,
-        gender: (response.user.gender as Gender) || 'prefer-not-to-say'
-      };
-
-      setCurrentUser(newUser);
+      await logOut();
+      setCurrentUser(null);
+      setCurrentPage('login');
+      apiClient.clearToken();
       setAssessmentHistory([]);
       setJournalEntries([]);
       setMoodLogs([]);
       setStreak(0);
-      // Fetch quote immediately after signup
-      try {
-        const motivationalQuote = await generateMotivationalQuote();
-        setQuote(motivationalQuote);
-      } catch (error) {
-        console.error("Error fetching quote:", error);
-        setQuote({ quote: "The best way to predict the future is to create it.", author: "Peter Drucker" });
-      }
-      setCurrentPage('dashboard');
-      setAuthError(null);
+      setBreathingSessions([]);
+      setCurrentStreakAPI(0);
+      setLongestStreakAPI(0);
+      console.log('User logged out, redirected to login');
     } catch (error) {
-      setAuthError("Signup failed. Please try again.");
+      console.error('Logout error:', error);
     }
-  };
-
-  const handleLogout = () => {
-    setCurrentUser(null);
-    setCurrentPage('login');
-    apiClient.setToken(''); // Clear the token - this will also remove from localStorage
-    setAssessmentHistory([]);
-    setJournalEntries([]);
-    setMoodLogs([]);
-    setStreak(0);
-    setBreathingSessions([]);
-    setCurrentStreakAPI(0);
-    setLongestStreakAPI(0);
-    console.log('User logged out, redirected to login');
   };
 
   const handleAssessmentComplete = async (result: AssessmentResult, answers: number[]) => {
@@ -415,14 +396,7 @@ const App: React.FC = () => {
     }
 
     if (!currentUser) {
-      switch (currentPage) {
-        case 'login':
-          return <Login onLogin={handleLogin} onNavigate={handleNavigate} error={authError} />;
-        case 'signup':
-          return <Signup onSignup={handleSignup} onNavigate={handleNavigate} error={authError} />;
-        default:
-          return <Login onLogin={handleLogin} onNavigate={handleNavigate} error={authError} />;
-      }
+      return <AuthPage onAuthSuccess={handleAuthSuccess} />;
     }
 
     switch (currentPage) {
@@ -438,7 +412,7 @@ const App: React.FC = () => {
       case 'reframer':
         return <ThoughtReframer onNavigate={handleNavigate} />;
       case 'profile':
-        return <Profile user={currentUser} assessmentHistory={assessmentHistory} moodLogs={moodLogs} theme={theme} onNavigate={handleNavigate} breathingSessions={breathingSessions} currentStreak={currentStreakAPI} longestStreak={longestStreakAPI} />;
+        return <Profile user={currentUser} assessmentHistory={assessmentHistory} moodLogs={moodLogs} theme={theme} onNavigate={handleNavigate} breathingSessions={breathingSessions} currentStreak={currentStreakAPI} longestStreak={longestStreakAPI} onProfileUpdate={(updatedUser) => setCurrentUser(updatedUser)} />;
       case 'journal':
         return <Journal entries={journalEntries} onSave={handleSaveJournalEntry} onNavigate={handleNavigate} />;
       case 'music':
@@ -455,8 +429,8 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-900 text-slate-800 dark:text-slate-200 font-sans">
-      <Header onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} theme={theme} setTheme={setTheme} />
-      <main className="p-4 sm:p-6 lg:p-8">
+      {currentUser && <Header onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} theme={theme} setTheme={setTheme} />}
+      <main className={currentUser ? "p-4 sm:p-6 lg:p-8" : ""}>
         <div key={currentPage} className="page-animate">
           {renderPage()}
         </div>

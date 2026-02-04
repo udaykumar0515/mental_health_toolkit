@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { readUsers } from '../database.js';
+import { findUserById } from '../database.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, '..', 'data');
@@ -21,13 +21,6 @@ const escapeCSV = (field) => {
 const formatRecommendations = (recommendations) => {
   if (!recommendations || !Array.isArray(recommendations)) return '';
   return recommendations.join(' | ');
-};
-
-// Get user name by ID
-const getUserName = (userId) => {
-  const users = readUsers();
-  const user = users.find(u => u.id === userId);
-  return user ? user.full_name : 'Unknown User';
 };
 
 // Format date from ISO string to readable format
@@ -57,8 +50,8 @@ const getCSVHeader = () => {
   ].map(escapeCSV).join(',');
 };
 
-// Convert assessment to CSV row
-const assessmentToCSVRow = (assessment) => {
+// Convert assessment to CSV row (sync version - user name lookup done separately)
+const assessmentToCSVRow = (assessment, userName) => {
   const answers = assessment.answers || {};
   const questionValues = [
     answers.q1 || '',
@@ -77,7 +70,7 @@ const assessmentToCSVRow = (assessment) => {
 
   const row = [
     assessment.id,
-    getUserName(assessment.user_id),
+    userName,
     assessment.user_id,
     assessment.score,
     assessment.stress_level,
@@ -90,18 +83,33 @@ const assessmentToCSVRow = (assessment) => {
 };
 
 // Export all assessments to CSV
-export const exportAssessmentsToCSV = (assessments) => {
+export const exportAssessmentsToCSV = async (assessments) => {
   try {
     // Ensure data directory exists
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
 
+    // Get user names for all assessments
+    const userCache = new Map();
+    for (const assessment of assessments) {
+      if (!userCache.has(assessment.user_id)) {
+        try {
+          const user = await findUserById(assessment.user_id);
+          userCache.set(assessment.user_id, user ? user.full_name : 'Unknown User');
+        } catch {
+          userCache.set(assessment.user_id, 'Unknown User');
+        }
+      }
+    }
+
     // Create CSV content
-    const csvContent = [
-      getCSVHeader(),
-      ...assessments.map(assessmentToCSVRow)
-    ].join('\n');
+    const csvRows = [getCSVHeader()];
+    for (const assessment of assessments) {
+      const userName = userCache.get(assessment.user_id) || 'Unknown User';
+      csvRows.push(assessmentToCSVRow(assessment, userName));
+    }
+    const csvContent = csvRows.join('\n');
 
     // Write to file
     fs.writeFileSync(CSV_FILE, csvContent, 'utf-8');

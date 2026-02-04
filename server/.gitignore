@@ -1,0 +1,35 @@
+# Environment Variables - NEVER COMMIT!
+.env
+.env.*
+!.env.example
+
+# Firebase Service Account Keys - NEVER COMMIT!
+serviceAccountKey.json
+service-account*.json
+firebase-service-account*.json
+*-firebase-adminsdk*.json
+firebase-adminsdk*.json
+
+# Dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Data files (local JSON storage - now using Firestore)
+data/*.json
+!data/questions.json
+!data/quotes.json
+
+# Build
+dist/
+build/
+
+# Cache
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db

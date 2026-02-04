@@ -13,8 +13,7 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 // Debug: Verify env vars are loaded
 console.log('🔑 GEMINI_API_KEY loaded:', process.env.GEMINI_API_KEY ? 'Yes (starts with ' + process.env.GEMINI_API_KEY.substring(0, 8) + '...)' : 'NO!');
 
-import { initializeFiles, readAssessments } from './database.js';
-import { exportAssessmentsToCSV } from './utils/csvExport.js';
+import { initializeFiles } from './database.js';
 import authRoutes from './routes/auth.js';
 import assessmentRoutes from './routes/assessment.js';
 import profileRoutes from './routes/profile.js';
@@ -36,18 +35,12 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// Initialize data files
+// Initialize Firestore connection
 initializeFiles();
-
-// Generate initial CSV export on startup
-const assessments = readAssessments();
-if (assessments.length > 0) {
-  exportAssessmentsToCSV(assessments);
-}
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok' });
+  res.json({ status: 'ok', database: 'firestore' });
 });
 
 // Routes
@@ -76,6 +69,5 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Mental Health Backend running on http://localhost:${PORT}`);
-  console.log(`📂 Data stored in: ${process.cwd()}/data`);
+  console.log(`🔥 Connected to Firebase Firestore`);
 });
-

@@ -1,27 +1,19 @@
+/**
+ * Authentication Routes
+ * 
+ * Uses Firebase Auth for user management.
+ * - POST /signup - Create new user in Firebase Auth + Firestore
+ * - POST /sync - Sync user profile after Firebase login (Google or Email)
+ * - GET /user - Get current user profile
+ */
+
 import express from 'express';
-import { registerUser, loginUser, getUserData, verifyToken } from '../auth.js';
+import { registerUser, syncUser, getUserData, updateUserProfile } from '../auth.js';
+import { verifyFirebaseToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Middleware to verify token
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ message: 'Missing token' });
-  }
-
-  const decoded = verifyToken(token);
-  if (!decoded) {
-    return res.status(401).json({ message: 'Invalid or expired token' });
-  }
-
-  req.userId = decoded.userId;
-  next();
-};
-
-// POST /api/auth/signup
+// POST /api/auth/signup - Create new user
 router.post('/signup', async (req, res) => {
   try {
     const { email, password, full_name, age, gender } = req.body;
@@ -33,30 +25,27 @@ router.post('/signup', async (req, res) => {
     const result = await registerUser(email, password, full_name, age, gender);
     res.status(201).json(result);
   } catch (error) {
+    console.error('Signup error:', error);
     res.status(400).json({ message: error.message });
   }
 });
 
-// POST /api/auth/login
-router.post('/login', async (req, res) => {
+// POST /api/auth/sync - Sync user profile after Firebase login
+// Called after Google sign-in or email/password login from frontend
+router.post('/sync', verifyFirebaseToken, async (req, res) => {
   try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password required' });
-    }
-
-    const result = await loginUser(email, password);
-    res.status(200).json(result);
+    const user = await syncUser(req.user);
+    res.status(200).json({ user });
   } catch (error) {
-    res.status(401).json({ message: error.message });
+    console.error('Sync error:', error);
+    res.status(500).json({ message: error.message });
   }
 });
 
-// GET /api/auth/user
-router.get('/user', authenticateToken, (req, res) => {
+// GET /api/auth/user - Get current user profile
+router.get('/user', verifyFirebaseToken, async (req, res) => {
   try {
-    const user = getUserData(req.userId);
+    const user = await getUserData(req.user.uid);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -64,9 +53,33 @@ router.get('/user', authenticateToken, (req, res) => {
 
     res.status(200).json(user);
   } catch (error) {
+    console.error('Get user error:', error);
     res.status(500).json({ message: error.message });
   }
 });
 
-export { authenticateToken };
+// PUT /api/auth/user - Update user profile
+router.put('/user', verifyFirebaseToken, async (req, res) => {
+  try {
+    const { full_name, age, gender, avatar_url } = req.body;
+    
+    const updates = {};
+    if (full_name !== undefined) updates.full_name = full_name;
+    if (age !== undefined) updates.age = age;
+    if (gender !== undefined) updates.gender = gender;
+    if (avatar_url !== undefined) updates.avatar_url = avatar_url;
+
+    const user = await updateUserProfile(req.user.uid, updates);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export default router;

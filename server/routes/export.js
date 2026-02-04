@@ -1,3 +1,9 @@
+/**
+ * Export Routes
+ * 
+ * Handles data export functionality.
+ */
+
 import express from 'express';
 import { readAssessments } from '../database.js';
 import { getCSVFilePath, exportAssessmentsToCSV } from '../utils/csvExport.js';
@@ -6,9 +12,9 @@ import fs from 'fs';
 const router = express.Router();
 
 // GET /api/export/csv - Download assessments as CSV
-router.get('/csv', (req, res) => {
+router.get('/csv', async (req, res) => {
   try {
-    const assessments = readAssessments();
+    const assessments = await readAssessments();
     
     // Export to CSV
     exportAssessmentsToCSV(assessments);

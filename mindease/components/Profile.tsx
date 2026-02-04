@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Assessment, MoodLog, Theme, Page, User } from '../types';
+import { Assessment, MoodLog, Theme, Page, User, Gender } from '../types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { Cell } from 'recharts';
-import { ArrowLeft, User as UserIcon } from 'lucide-react';
+import { ArrowLeft, User as UserIcon, Edit2, Save, X } from 'lucide-react';
+import { apiClient } from '../services/apiClient';
 
 interface ProfileProps {
     user: User;
@@ -13,9 +14,18 @@ interface ProfileProps {
     breathingSessions?: Array<{ id: string; duration_seconds: number; cycles_completed: number; created_at: string }>;
     currentStreak?: number;
     longestStreak?: number;
+    onProfileUpdate?: (updatedUser: User) => void;
 }
 
-const Profile: React.FC<ProfileProps> = ({ user, assessmentHistory, moodLogs, theme, onNavigate, breathingSessions = [], currentStreak = 0, longestStreak = 0 }) => {
+const Profile: React.FC<ProfileProps> = ({ user, assessmentHistory, moodLogs, theme, onNavigate, breathingSessions = [], currentStreak = 0, longestStreak = 0, onProfileUpdate }) => {
+    // Editable profile state
+    const [isEditing, setIsEditing] = useState(false);
+    const [editName, setEditName] = useState(user.name);
+    const [editAge, setEditAge] = useState(user.age);
+    const [editGender, setEditGender] = useState<Gender>(user.gender);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
+    const [saveSuccess, setSaveSuccess] = useState(false);
 
     const chartData = assessmentHistory.map(a => ({
         name: new Date(a.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -51,6 +61,57 @@ const Profile: React.FC<ProfileProps> = ({ user, assessmentHistory, moodLogs, th
                 <div className="text-xs opacity-80">value: {item.value}</div>
             </div>
         );
+    };
+
+    const handleEditClick = () => {
+        setEditName(user.name);
+        setEditAge(user.age);
+        setEditGender(user.gender);
+        setIsEditing(true);
+        setSaveError(null);
+        setSaveSuccess(false);
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditing(false);
+        setSaveError(null);
+    };
+
+    const handleSaveProfile = async () => {
+        setIsSaving(true);
+        setSaveError(null);
+        setSaveSuccess(false);
+
+        try {
+            const updates = {
+                full_name: editName,
+                age: editAge,
+                gender: editGender
+            };
+
+            await apiClient.updateProfile(updates);
+
+            // Update local state
+            if (onProfileUpdate) {
+                onProfileUpdate({
+                    ...user,
+                    name: editName,
+                    age: editAge,
+                    gender: editGender
+                });
+            }
+
+            setSaveSuccess(true);
+            setIsEditing(false);
+            
+            // Clear success message after a few seconds
+            setTimeout(() => setSaveSuccess(false), 3000);
+        } catch (error) {
+            console.error('Error saving profile:', error);
+            setSaveError('Failed to save profile. Please try again.');
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
@@ -90,16 +151,69 @@ const Profile: React.FC<ProfileProps> = ({ user, assessmentHistory, moodLogs, th
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                 {/* Left Column - Personal Details */}
                 <div className="bg-gradient-to-br from-white/80 to-slate-50/80 dark:from-gray-800/50 dark:to-gray-900/50 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-slate-200 dark:border-gray-700 lg:col-span-1">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="bg-blue-100 dark:bg-blue-900/50 p-3 rounded-full">
-                            <UserIcon />
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-blue-100 dark:bg-blue-900/50 p-3 rounded-full">
+                                <UserIcon />
+                            </div>
+                            <h3 className="text-2xl font-bold text-slate-800 dark:text-white">Profile</h3>
                         </div>
-                        <h3 className="text-2xl font-bold text-slate-800 dark:text-white">Profile</h3>
+                        {!isEditing ? (
+                            <button
+                                onClick={handleEditClick}
+                                className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                            >
+                                <Edit2 size={16} />
+                                Edit
+                            </button>
+                        ) : (
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleCancelEdit}
+                                    className="flex items-center gap-1 px-3 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                                    disabled={isSaving}
+                                >
+                                    <X size={16} />
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSaveProfile}
+                                    className="flex items-center gap-1 px-3 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
+                                    disabled={isSaving}
+                                >
+                                    <Save size={16} />
+                                    {isSaving ? 'Saving...' : 'Save'}
+                                </button>
+                            </div>
+                        )}
                     </div>
+                    
+                    {/* Success/Error Messages */}
+                    {saveSuccess && (
+                        <div className="mb-4 p-3 rounded-xl bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm">
+                            Profile updated successfully!
+                        </div>
+                    )}
+                    {saveError && (
+                        <div className="mb-4 p-3 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm">
+                            {saveError}
+                        </div>
+                    )}
+
                     <div className="space-y-4">
                         <div className="pb-4 border-b border-slate-200 dark:border-gray-700">
                             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Name</p>
-                            <p className="text-lg font-semibold text-slate-800 dark:text-white mt-1">{user.name}</p>
+                            {isEditing ? (
+                                <input
+                                    type="text"
+                                    value={editName}
+                                    onChange={(e) => setEditName(e.target.value)}
+                                    className="w-full mt-1 px-3 py-2 bg-white dark:bg-gray-700 border border-slate-300 dark:border-gray-600 rounded-lg text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                    placeholder="Your name"
+                                />
+                            ) : (
+                                <p className="text-lg font-semibold text-slate-800 dark:text-white mt-1">{user.name}</p>
+                            )}
                         </div>
                         <div className="pb-4 border-b border-slate-200 dark:border-gray-700">
                             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Email</p>
@@ -107,11 +221,38 @@ const Profile: React.FC<ProfileProps> = ({ user, assessmentHistory, moodLogs, th
                         </div>
                         <div className="pb-4 border-b border-slate-200 dark:border-gray-700">
                             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Age</p>
-                            <p className="text-lg font-semibold text-slate-800 dark:text-white mt-1">{user.age} years</p>
+                            {isEditing ? (
+                                <input
+                                    type="number"
+                                    value={editAge}
+                                    onChange={(e) => setEditAge(parseInt(e.target.value) || 0)}
+                                    className="w-full mt-1 px-3 py-2 bg-white dark:bg-gray-700 border border-slate-300 dark:border-gray-600 rounded-lg text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                    min="1"
+                                    max="120"
+                                    placeholder="Your age"
+                                />
+                            ) : (
+                                <p className="text-lg font-semibold text-slate-800 dark:text-white mt-1">{user.age > 0 ? `${user.age} years` : 'Not set'}</p>
+                            )}
                         </div>
                         <div>
                             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Gender</p>
-                            <p className="text-lg font-semibold text-slate-800 dark:text-white mt-1 capitalize">{user.gender}</p>
+                            {isEditing ? (
+                                <select
+                                    value={editGender}
+                                    onChange={(e) => setEditGender(e.target.value as Gender)}
+                                    className="w-full mt-1 px-3 py-2 bg-white dark:bg-gray-700 border border-slate-300 dark:border-gray-600 rounded-lg text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                >
+                                    <option value="prefer-not-to-say">Prefer not to say</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="non-binary">Non-binary</option>
+                                </select>
+                            ) : (
+                                <p className="text-lg font-semibold text-slate-800 dark:text-white mt-1 capitalize">
+                                    {user.gender === 'prefer-not-to-say' ? 'Not specified' : user.gender}
+                                </p>
+                            )}
                         </div>
                         <div className="pt-4 border-t border-slate-200 dark:border-gray-700">
                             <button

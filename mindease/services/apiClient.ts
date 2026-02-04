@@ -1,78 +1,159 @@
+/**
+ * API Client for Backend Communication
+ * 
+ * Uses Firebase ID tokens for authentication.
+ * All authenticated requests use the token from Firebase Auth.
+ */
+
 import { AuthResponse, User, Question, Assessment, JournalEntry, MoodLog, BreathingSession, ProfileResponse, JournalEntryResponse, MoodLogResponse, AssessmentResponse, UserResponse } from '../types';
+import { getIdToken, auth } from '../firebase';
 
 const API_BASE_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
 class ApiClient {
-  private token: string | null = null;
+  private cachedToken: string | null = null;
 
-  constructor() {
-    this.token = localStorage.getItem('auth_token');
+  /**
+   * Get the current Firebase ID token
+   * Refreshes automatically if expired
+   */
+  async getFirebaseToken(): Promise<string | null> {
+    const user = auth.currentUser;
+    if (!user) {
+      this.cachedToken = null;
+      return null;
+    }
+    
+    try {
+      // Get fresh token (Firebase SDK handles refresh automatically)
+      const token = await user.getIdToken();
+      this.cachedToken = token;
+      return token;
+    } catch (error) {
+      console.error('Error getting Firebase token:', error);
+      this.cachedToken = null;
+      return null;
+    }
   }
 
+  /**
+   * Check if user is authenticated
+   */
+  isAuthenticated(): boolean {
+    return auth.currentUser !== null;
+  }
+
+  /**
+   * Clear cached token (for logout)
+   */
+  clearToken() {
+    this.cachedToken = null;
+  }
+
+  // Legacy methods for backward compatibility during transition
   setToken(token: string) {
     if (token === '') {
-      this.token = null;
+      this.cachedToken = null;
       localStorage.removeItem('auth_token');
     } else {
-      this.token = token;
+      this.cachedToken = token;
       localStorage.setItem('auth_token', token);
     }
   }
 
   getToken(): string | null {
-    const storedToken = localStorage.getItem('auth_token');
-    this.token = storedToken;
-    return this.token;
+    // First check Firebase
+    if (auth.currentUser) {
+      return this.cachedToken;
+    }
+    // Fallback to localStorage for transition
+    return localStorage.getItem('auth_token');
   }
 
-  private getHeaders() {
+  private async getHeaders(): Promise<Record<string, string>> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
-    if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
+    
+    // Get Firebase token
+    const token = await this.getFirebaseToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
+    
     return headers;
   }
 
   // ===== Authentication =====
+  
+  /**
+   * Sync user profile with backend after Firebase authentication
+   * Call this after signInWithGoogle or signInWithEmail
+   */
+  async syncUser(): Promise<UserResponse> {
+    const headers = await this.getHeaders();
+    const response = await fetch(`${API_BASE_URL}/auth/sync`, {
+      method: 'POST',
+      headers,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Sync failed' }));
+      throw new Error(error.message || 'Failed to sync user');
+    }
+
+    const data = await response.json();
+    return data.user;
+  }
+
+  /**
+   * Create a new user with email/password
+   * This creates the user in Firebase Auth AND stores profile in Firestore
+   */
   async signup(email: string, password: string, fullName: string, age?: number, gender?: string): Promise<AuthResponse> {
     const response = await fetch(`${API_BASE_URL}/auth/signup`, {
       method: 'POST',
-      headers: this.getHeaders(),
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, full_name: fullName, age, gender }),
     });
 
     if (!response.ok) {
-      throw new Error('Signup failed');
+      const error = await response.json().catch(() => ({ message: 'Signup failed' }));
+      throw new Error(error.message || 'Signup failed');
     }
 
-    const data = await response.json();
-    this.setToken(data.token);
-    return data;
+    return response.json();
   }
 
-  async login(email: string, password: string): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: this.getHeaders(),
-      body: JSON.stringify({ email, password }),
+  /**
+   * Get current user profile from backend
+   */
+  async getUser(): Promise<UserResponse> {
+    const headers = await this.getHeaders();
+    const response = await fetch(`${API_BASE_URL}/auth/user`, {
+      method: 'GET',
+      headers,
     });
 
     if (!response.ok) {
-      throw new Error('Login failed');
+      throw new Error('Failed to get user');
     }
 
-    const data = await response.json();
-    this.setToken(data.token);
-    return data;
+    return response.json();
+  }
+
+  // Deprecated: Use Firebase SDK for login instead
+  async login(email: string, password: string): Promise<AuthResponse> {
+    console.warn('apiClient.login is deprecated. Use Firebase signInWithEmail instead.');
+    throw new Error('Use Firebase SDK for login');
   }
 
   // ===== Questions =====
   async getQuestions(): Promise<Question[]> {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/questions`, {
       method: 'GET',
-      headers: this.getHeaders(),
+      headers,
     });
 
     if (!response.ok) {
@@ -89,9 +170,10 @@ class ApiClient {
     score: number,
     recommendations: string[]
   ): Promise<AssessmentResponse> {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/assessment/submit`, {
       method: 'POST',
-      headers: this.getHeaders(),
+      headers,
       body: JSON.stringify({ answers, stress_level: stressLevel, score, recommendations }),
     });
 
@@ -103,9 +185,10 @@ class ApiClient {
   }
 
   async getAssessmentHistory(): Promise<AssessmentResponse[]> {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/assessment/history`, {
       method: 'GET',
-      headers: this.getHeaders(),
+      headers,
     });
 
     if (!response.ok) {
@@ -116,9 +199,10 @@ class ApiClient {
   }
 
   async getLatestAssessment(): Promise<AssessmentResponse | null> {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/assessment/latest`, {
       method: 'GET',
-      headers: this.getHeaders(),
+      headers,
     });
 
     if (!response.ok) {
@@ -130,9 +214,10 @@ class ApiClient {
 
   // ===== Journals =====
   async createJournal(title: string, content: string, mood?: string): Promise<JournalEntryResponse> {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/journals`, {
       method: 'POST',
-      headers: this.getHeaders(),
+      headers,
       body: JSON.stringify({ title, content, mood }),
     });
 
@@ -144,9 +229,10 @@ class ApiClient {
   }
 
   async getJournals(): Promise<JournalEntryResponse[]> {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/journals`, {
       method: 'GET',
-      headers: this.getHeaders(),
+      headers,
     });
 
     if (!response.ok) {
@@ -157,9 +243,10 @@ class ApiClient {
   }
 
   async updateJournal(id: string, title?: string, content?: string, mood?: string): Promise<JournalEntryResponse> {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/journals/${id}`, {
       method: 'PUT',
-      headers: this.getHeaders(),
+      headers,
       body: JSON.stringify({ title, content, mood }),
     });
 
@@ -171,9 +258,10 @@ class ApiClient {
   }
 
   async deleteJournal(id: string): Promise<void> {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/journals/${id}`, {
       method: 'DELETE',
-      headers: this.getHeaders(),
+      headers,
     });
 
     if (!response.ok) {
@@ -183,9 +271,10 @@ class ApiClient {
 
   // ===== Mood Logs =====
   async createMoodLog(mood: string, intensity: number, note?: string): Promise<MoodLogResponse> {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/mood-logs`, {
       method: 'POST',
-      headers: this.getHeaders(),
+      headers,
       body: JSON.stringify({ mood, intensity, note }),
     });
 
@@ -197,9 +286,10 @@ class ApiClient {
   }
 
   async getMoodLogs(): Promise<MoodLogResponse[]> {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/mood-logs`, {
       method: 'GET',
-      headers: this.getHeaders(),
+      headers,
     });
 
     if (!response.ok) {
@@ -210,9 +300,10 @@ class ApiClient {
   }
 
   async deleteMoodLog(id: string): Promise<void> {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/mood-logs/${id}`, {
       method: 'DELETE',
-      headers: this.getHeaders(),
+      headers,
     });
 
     if (!response.ok) {
@@ -222,9 +313,10 @@ class ApiClient {
 
   // ===== Breathing Sessions =====
   async createBreathingSession(duration: number, cycles: number): Promise<BreathingSession> {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/breathing/sessions`, {
       method: 'POST',
-      headers: this.getHeaders(),
+      headers,
       body: JSON.stringify({ duration_seconds: duration, cycles_completed: cycles }),
     });
 
@@ -236,9 +328,10 @@ class ApiClient {
   }
 
   async getBreathingSessions(): Promise<BreathingSession[]> {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/breathing/sessions`, {
       method: 'GET',
-      headers: this.getHeaders(),
+      headers,
     });
 
     if (!response.ok) {
@@ -250,10 +343,10 @@ class ApiClient {
 
   // ===== Profile =====
   async getProfile(): Promise<ProfileResponse> {
-    // Get profile data (stats + sessions)
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/profile/data`, {
       method: 'GET',
-      headers: this.getHeaders(),
+      headers,
     });
 
     if (!response.ok) {
@@ -265,9 +358,10 @@ class ApiClient {
 
   // ===== Streaks =====
   async incrementStreak(): Promise<{ current_streak: number; longest_streak: number }> {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/streaks/increment`, {
       method: 'POST',
-      headers: this.getHeaders(),
+      headers,
     });
 
     if (!response.ok) throw new Error('Failed to increment streak');
@@ -275,9 +369,10 @@ class ApiClient {
   }
 
   async resetStreak(): Promise<{ current_streak: number }> {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/streaks/reset`, {
       method: 'POST',
-      headers: this.getHeaders(),
+      headers,
     });
 
     if (!response.ok) throw new Error('Failed to reset streak');
@@ -285,9 +380,10 @@ class ApiClient {
   }
 
   async updateProfile(updates: Partial<User>): Promise<User> {
-    const response = await fetch(`${API_BASE_URL}/profile`, {
+    const headers = await this.getHeaders();
+    const response = await fetch(`${API_BASE_URL}/auth/user`, {
       method: 'PUT',
-      headers: this.getHeaders(),
+      headers,
       body: JSON.stringify(updates),
     });
 
@@ -300,9 +396,10 @@ class ApiClient {
 
   // ===== Music =====
   async getMusicByMood(mood: string): Promise<{ mood: string; files: string[] }> {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/music/${mood}`, {
       method: 'GET',
-      headers: this.getHeaders(),
+      headers,
     });
 
     if (!response.ok) {
@@ -311,6 +408,7 @@ class ApiClient {
 
     return response.json();
   }
+
   // ===== Feedback =====
   async submitFeedback(content: string, rating: number, category: string, userDetails?: { name: string; email: string; user_id?: string }): Promise<any> {
     const body = {
@@ -320,9 +418,10 @@ class ApiClient {
       ...userDetails
     };
 
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/feedback`, {
       method: 'POST',
-      headers: this.getHeaders(),
+      headers,
       body: JSON.stringify(body),
     });
 
