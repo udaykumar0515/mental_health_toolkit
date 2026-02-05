@@ -2,6 +2,12 @@
 
 A comprehensive full-stack application for mental health assessment, stress tracking, breathing exercises, and wellness management. Designed to help users understand and manage their stress levels with personalized recommendations.
 
+## 🌐 Live Demo
+
+**Try MindEase now:** [https://mindease-mental-health-toolkit.web.app/](https://mindease-mental-health-toolkit.web.app/)
+
+---
+
 ## 🎯 Project Overview
 
 The Mental Health Toolkit is a two-part application:
@@ -17,6 +23,40 @@ The Mental Health Toolkit is a two-part application:
 - 👤 **User Profiles**: Personalized dashboards with stats and recommendations
 - 🔐 **Secure Authentication**: JWT-based auth with password hashing
 - 💾 **Data Persistence**: All data saved to JSON files
+
+---
+
+## 📸 Screenshots
+
+### Sign In Page
+![Sign In Page](screenshots/signin_page.png)
+
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+### Stress Assessment Results
+![Assessment Results](screenshots/assignment_result_page.png)
+
+### Breathing Exercise
+![Breathing Exercise](screenshots/breathing_exerice_page.png)
+
+### CalmBot AI Chatbot
+![CalmBot in Action](screenshots/calmbot_inaction.png)
+
+### Thought Reframer
+![Thought Reframer](screenshots/thought_reframer.png)
+
+### Journal Entry
+![Journal Entry](screenshots/journal_entry.png)
+
+### Mood Tracker & Music Player
+![Music Player](screenshots/music_player.png)
+
+### Profile Page
+![Profile Page](screenshots/profile_page.png)
+
+### Feedback Page
+![Feedback Page](screenshots/feedback_page.png)
 
 ---
 
