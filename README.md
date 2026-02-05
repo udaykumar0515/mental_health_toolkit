@@ -13,16 +13,20 @@ A comprehensive full-stack application for mental health assessment, stress trac
 The Mental Health Toolkit is a two-part application:
 
 - **Frontend**: React + TypeScript application with a modern, responsive UI
-- **Backend**: Node.js/Express API with secure authentication and data persistence
+- **Backend**: Node.js/Express API with Firebase Firestore database
 
 ### Key Features
 
-- 🧠 **Stress Assessment**: 17-question assessment to evaluate stress levels
+- 🧠 **Stress Assessment**: 12-question PSS-based assessment to evaluate stress levels
 - 🌬️ **Guided Breathing Exercises**: Interactive breathing sessions with cycle tracking
+- 🤖 **CalmBot AI**: AI-powered chatbot for mental wellness support (Gemini API)
+- 💭 **Thought Reframer**: Tool to restructure negative thought patterns
+- 📝 **Journaling**: Personal journal entries for self-reflection
+- 🎵 **Mood Tracker & Music**: Track mood and access calming music
 - 📊 **Progress Tracking**: View assessment history and trends
 - 👤 **User Profiles**: Personalized dashboards with stats and recommendations
-- 🔐 **Secure Authentication**: JWT-based auth with password hashing
-- 💾 **Data Persistence**: All data saved to JSON files
+- 🔐 **Secure Authentication**: Firebase Auth with Google Sign-in and Email/Password
+- 💾 **Cloud Database**: Firebase Firestore for data persistence
 
 ---
 
@@ -66,41 +70,56 @@ The Mental Health Toolkit is a two-part application:
 mental_health_toolkit/
 ├── server/                    # Backend (Node.js/Express)
 │   ├── index.js              # Server entry point
-│   ├── database.js           # Data persistence layer
+│   ├── database.js           # Firebase Firestore connection
 │   ├── auth.js               # Authentication middleware
-│   ├── routes/               # API endpoints
+│   ├── routes/               # API endpoints (14 route files)
 │   │   ├── auth.js          # Auth routes (signup, login)
 │   │   ├── assessment.js    # Assessment submission & history
 │   │   ├── breathing.js     # Breathing session routes
 │   │   ├── profile.js       # User profile routes
-│   │   └── questions.js     # Assessment questions
-│   ├── data/                # JSON data files
-│   │   ├── users.json       # User accounts
-│   │   ├── assessments.json # Stress assessments
-│   │   ├── breathing_sessions.json # Breathing data
-│   │   └── questions.json   # Assessment questions
+│   │   ├── questions.js     # Assessment questions
+│   │   ├── journals.js      # Journal entries
+│   │   ├── mood-logs.js     # Mood tracking
+│   │   ├── streaks.js       # User streaks
+│   │   ├── music.js         # Music player routes
+│   │   ├── export.js        # Data export
+│   │   ├── feedback.js      # User feedback
+│   │   ├── ai.js            # CalmBot AI (Gemini API)
+│   │   ├── quotes.js        # Motivational quotes
+│   │   └── report.js        # Report generation
+│   ├── data/                # Static data files
+│   │   ├── questions.json   # 12 PSS assessment questions
+│   │   ├── quotes.json      # Motivational quotes
+│   │   └── musicks/         # Music files (36 tracks)
 │   └── package.json
 │
-└── stress-minder/            # Frontend (React/TypeScript)
-    ├── src/
-    │   ├── pages/           # Page components
-    │   │   ├── Index.tsx    # Home/Dashboard
-    │   │   ├── Auth.tsx     # Login/Signup
-    │   │   ├── Profile.tsx  # User profile
-    │   │   ├── Breathing.tsx # Breathing exercises
-    │   │   └── NotFound.tsx # 404 page
-    │   ├── components/      # Reusable components
-    │   │   ├── assessment/  # Assessment components
-    │   │   ├── auth/        # Auth components
-    │   │   ├── breathing/   # Breathing components
-    │   │   └── ui/          # shadcn/ui components
-    │   ├── integrations/api/ # API client
-    │   ├── hooks/           # Custom React hooks
-    │   ├── lib/             # Utility functions
-    │   └── App.tsx          # Main app component
-    ├── index.html           # HTML entry point
-    ├── vite.config.ts       # Vite configuration
-    ├── tailwind.config.ts   # Tailwind CSS config
+└── mindease/                  # Frontend (React/TypeScript)
+    ├── App.tsx               # Main app component with routing
+    ├── index.tsx             # Entry point
+    ├── index.html            # HTML template
+    ├── firebase.ts           # Firebase configuration
+    ├── components/           # React components (16 files)
+    │   ├── AuthPage.tsx     # Login/Signup with Firebase Auth
+    │   ├── Dashboard.tsx    # Main dashboard
+    │   ├── Profile.tsx      # User profile
+    │   ├── StressAssessment.tsx # 12-question assessment
+    │   ├── AssessmentResults.tsx # Results display
+    │   ├── BreathingExercise.tsx # Guided breathing
+    │   ├── CalmBot.tsx      # AI chatbot
+    │   ├── FloatingChatBot.tsx # Chat widget
+    │   ├── ThoughtReframer.tsx # Thought reframing
+    │   ├── Journal.tsx      # Journal entries
+    │   ├── MoodTracker.tsx  # Mood tracking
+    │   ├── MoodCard.tsx     # Mood display card
+    │   ├── MusicPlayer.tsx  # Music player
+    │   ├── FeedbackForm.tsx # User feedback
+    │   ├── Header.tsx       # Navigation header
+    │   └── Signup.tsx       # Signup form
+    ├── services/             # API service layer
+    ├── utils/                # Utility functions
+    ├── types.ts              # TypeScript types
+    ├── constants.ts          # App constants
+    ├── vite.config.ts        # Vite configuration
     └── package.json
 ```
 
@@ -112,7 +131,7 @@ mental_health_toolkit/
 
 - **Node.js** v16 or higher
 - **npm** v7 or higher
-- **Git** (optional, for cloning)
+- **Firebase Project** with Firestore enabled
 
 ### 1️⃣ Backend Setup
 
@@ -128,12 +147,13 @@ cd server
 npm install
 ```
 
-#### Step 3: Create environment file (optional)
+#### Step 3: Create environment file
 
-The server works without `.env`, but you can create one:
+Create a `.env` file with your Firebase and Gemini API credentials:
 
 ```bash
-echo "PORT=5000" > .env
+PORT=5000
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
 #### Step 4: Start the server
@@ -146,21 +166,41 @@ npm start
 
 **Expected output:**
 ```
-Server running on http://localhost:5000
+🚀 Server running on port 5000
+🔥 Connected to Firebase Firestore
 ```
 
 #### API Endpoints Available:
 
+**Authentication:**
 - `POST /api/auth/signup` - Register new user
 - `POST /api/auth/login` - Login user
 - `GET /api/auth/user` - Get current user
+
+**Assessment:**
 - `POST /api/assessment/submit` - Submit assessment
 - `GET /api/assessment/history` - Get assessment history
 - `GET /api/assessment/latest` - Get latest assessment
-- `GET /api/questions` - Fetch questions
+- `GET /api/questions` - Fetch 12 PSS questions
+
+**Wellness Features:**
 - `POST /api/breathing/sessions` - Save breathing session
 - `GET /api/breathing/sessions` - Get breathing sessions
+- `POST /api/journals` - Create journal entry
+- `GET /api/journals` - Get journal entries
+- `POST /api/mood-logs` - Log mood
+- `GET /api/mood-logs` - Get mood history
+- `GET /api/streaks` - Get user streaks
+
+**AI & Content:**
+- `POST /api/ai/chat` - CalmBot AI conversation
+- `GET /api/quotes` - Get motivational quotes
+- `GET /api/music` - Get music tracks
+
+**User:**
 - `GET /api/profile` - Get user profile
+- `POST /api/feedback` - Submit feedback
+- `GET /api/export` - Export user data
 
 ---
 
@@ -169,7 +209,7 @@ Server running on http://localhost:5000
 #### Step 1: Open new terminal, navigate to frontend
 
 ```bash
-cd stress-minder
+cd mindease
 ```
 
 #### Step 2: Install dependencies
@@ -178,7 +218,11 @@ cd stress-minder
 npm install
 ```
 
-#### Step 3: Start development server
+#### Step 3: Configure Firebase
+
+Update `firebase.ts` with your Firebase project credentials.
+
+#### Step 4: Start development server
 
 ```bash
 npm run dev
@@ -188,13 +232,13 @@ npm run dev
 ```
 VITE v5.4.19  ready in 234 ms
 
-➜  Local:   http://localhost:8080/
+➜  Local:   http://localhost:5173/
 ➜  press h to show help
 ```
 
-#### Step 4: Open in browser
+#### Step 5: Open in browser
 
-Visit `http://localhost:8080` in your web browser
+Visit `http://localhost:5173` in your web browser
 
 ---
 
@@ -202,18 +246,18 @@ Visit `http://localhost:8080` in your web browser
 
 ### Assessment Flow
 
-1. **User takes 17-question assessment**
-   - Questions cover stress, anxiety, sleep, mood, physical symptoms, etc.
-   - Each question has 4 options: "Never" (0) → "Almost always" (3)
+1. **User takes 12-question PSS assessment**
+   - Questions based on Perceived Stress Scale (PSS)
+   - Each question has 5 options: "Never" (0) → "Very Often" (4)
 
 2. **Score Calculation**
-   - Each answer is scored 0-3 points
-   - Total raw score = sum of all 17 answers
-   - Maximum possible score = 17 × 3 = 51 points
+   - Each answer is scored 0-4 points
+   - Total raw score = sum of all 12 answers
+   - Maximum possible score = 12 × 4 = 48 points
 
 3. **Percentage Conversion**
-   - Stress percentage = (Raw Score ÷ 51) × 100
-   - Example: Raw Score of 25 = (25 ÷ 51) × 100 = **49%**
+   - Stress percentage = (Raw Score ÷ 48) × 100
+   - Example: Raw Score of 24 = (24 ÷ 48) × 100 = **50%**
 
 4. **Stress Level Classification**
    - **Low**: 0-30%
@@ -228,51 +272,24 @@ Visit `http://localhost:8080` in your web browser
    - High → "Consider professional support"
    - Severe → "Seek professional help immediately"
 
-### Real-World Example
-
-**Scenario**: User answers assessment
-
-```
-Question 1: "How often have you felt nervous?" → Sometimes (1 point)
-Question 2: "Trouble relaxing?" → Often (2 points)
-Question 3: "Feel overwhelmed?" → Sometimes (1 point)
-... (14 more questions)
-Question 17: "Stress impact appetite?" → Almost always (3 points)
-
-Raw Score: 1+2+1+2+2+3+2+1+2+2+3+1+2+2+2+3+3 = 35 points
-Percentage: (35 ÷ 51) × 100 = 68.6%
-Classification: HIGH stress level
-Recommendations: 
-  - Consider speaking to a friend or counselor
-  - Practice relaxation techniques daily
-  - Set boundaries and prioritize self-care
-  - Seek professional support if needed
-```
-
 ---
 
 ## 🔐 Authentication System
 
-### How Login Works
+The app uses **Firebase Authentication** with multiple sign-in options:
 
-1. **Signup**: User provides email, password, and full name
-   - Password is hashed using bcryptjs
-   - User account created in `server/data/users.json`
+1. **Email/Password Authentication**
+   - Secure signup with email verification
+   - Password requirements enforced
 
-2. **Login**: User provides email and password
-   - Password verified against hashed password
-   - JWT token generated (7-day expiration)
-   - Token stored in browser's localStorage
+2. **Google Sign-In**
+   - One-click authentication
+   - Profile synced from Google account
 
-3. **Protected Routes**: Every API request includes JWT token
-   ```javascript
-   // Token sent in Authorization header
-   Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
-   ```
-
-4. **Token Validation**: Backend verifies token on each request
-   - If valid: request proceeds
-   - If expired/invalid: user redirected to login
+3. **Session Management**
+   - Firebase ID tokens for API authentication
+   - Automatic token refresh
+   - Secure logout
 
 ---
 
@@ -287,224 +304,36 @@ Users can perform guided breathing exercises:
   - Number of cycles completed
   - Timestamp
 
-**Example saved session:**
-```json
-{
-  "id": "session_1700000000000",
-  "user_id": "user123",
-  "duration_seconds": 120,
-  "cycles_completed": 10,
-  "created_at": "2025-11-16T10:30:00.000Z"
-}
-```
-
 ---
 
-## 📊 Data Storage
+## 🤖 CalmBot AI
 
-All data is stored in JSON files in `server/data/`:
+CalmBot is an AI-powered mental wellness chatbot:
 
-### users.json
-```json
-{
-  "id": "user_1700000000000",
-  "email": "john@example.com",
-  "password": "$2a$10$...", // bcrypt hashed
-  "full_name": "John Doe",
-  "created_at": "2025-11-16T10:00:00.000Z"
-}
-```
-
-### assessments.json
-```json
-{
-  "id": "assessment_1700000000000",
-  "user_id": "user_1700000000000",
-  "stress_level": "moderate",
-  "score": 52,
-  "answers": {
-    "q1": 2,
-    "q2": 3,
-    ...
-  },
-  "recommendations": [...],
-  "created_at": "2025-11-16T10:30:00.000Z"
-}
-```
-
-### questions.json
-```json
-[
-  {
-    "id": "q1",
-    "text": "How often have you felt nervous or stressed in the last week?",
-    "options": ["Never", "Sometimes", "Often", "Almost always"]
-  },
-  ...
-]
-```
+- **Powered by**: Google Gemini API
+- **Features**:
+  - Empathetic conversations
+  - Mental wellness tips
+  - Stress management techniques
+  - Available 24/7
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **React** 18.3.1 - UI framework
-- **TypeScript** 5.8.3 - Type safety
-- **Vite** 5.4.19 - Build tool (3x faster than Create React App)
-- **Tailwind CSS** 3.4.17 - Utility-first CSS
-- **shadcn/ui** - Component library
-- **Recharts** 2.15.4 - Charts and visualizations
-- **React Router** v6 - Client-side routing
-- **Sonner** 1.7.4 - Toast notifications
+- **React** 18 - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool
+- **Tailwind CSS** - Styling
+- **Firebase Auth** - Authentication
 - **Lucide React** - Icon library
 
 ### Backend
-- **Node.js** with **Express** 4.18.2 - Server framework
-- **bcryptjs** 2.4.3 - Password hashing
-- **jsonwebtoken** 9.0.0 - JWT authentication
-- **CORS** 2.8.5 - Cross-origin requests
-- **fs** (built-in) - File operations
-
----
-
-## 📝 API Documentation
-
-### Authentication
-
-#### Signup
-```bash
-POST /api/auth/signup
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "password123",
-  "full_name": "John Doe"
-}
-
-Response: { token, user: { id, email, full_name } }
-```
-
-#### Login
-```bash
-POST /api/auth/login
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-
-Response: { token, user: { id, email, full_name } }
-```
-
-### Assessment
-
-#### Submit Assessment
-```bash
-POST /api/assessment/submit
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-  "answers": { "q1": 2, "q2": 3, ... },
-  "stress_level": "moderate",
-  "score": 52,
-  "recommendations": [...]
-}
-
-Response: { id, stress_level, score, created_at }
-```
-
-#### Get History
-```bash
-GET /api/assessment/history
-Authorization: Bearer {token}
-
-Response: [{ id, stress_level, score, created_at }, ...]
-```
-
-### Breathing
-
-#### Save Session
-```bash
-POST /api/breathing/sessions
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-  "duration_seconds": 120,
-  "cycles_completed": 10
-}
-
-Response: { id, duration_seconds, cycles_completed, created_at }
-```
-
-#### Get Sessions
-```bash
-GET /api/breathing/sessions
-Authorization: Bearer {token}
-
-Response: [{ id, duration_seconds, cycles_completed, created_at }, ...]
-```
-
----
-
-## 🐛 Troubleshooting
-
-### Port Already in Use
-
-**Problem**: `Error: listen EADDRINUSE :::5000`
-
-**Solution**: Change port in `server/index.js`
-```javascript
-const PORT = process.env.PORT || 3001; // Use 3001 instead
-```
-
-### CORS Error
-
-**Problem**: `Access to XMLHttpRequest blocked by CORS policy`
-
-**Solution**: CORS is already enabled in backend. Make sure:
-- Backend is running on `http://localhost:5000`
-- Frontend is running on `http://localhost:8080`
-
-### Login Not Working
-
-**Problem**: "Invalid email or password"
-
-**Solutions**:
-1. Make sure you signed up first
-2. Check that email is correct (case-insensitive)
-3. Check `server/data/users.json` exists
-4. Restart both servers
-
-### Questions Not Loading
-
-**Problem**: Assessment page shows "No questions available"
-
-**Solutions**:
-1. Ensure `server/data/questions.json` exists
-2. Check that questions.json has valid JSON format
-3. Verify backend is running
-4. Check browser console for errors
-
----
-
-## 🚢 Deployment (Future)
-
-To deploy this project:
-
-### Backend
-- Host on: Heroku, Railway, Render, or AWS
-- Use environment variables for sensitive data
-- Consider switching from JSON files to a database
-
-### Frontend
-- Build: `npm run build`
-- Host on: Vercel, Netlify, GitHub Pages, or AWS
-- Update API URL in `.env` to deployed backend URL
+- **Node.js** with **Express** - Server framework
+- **Firebase Firestore** - Cloud database
+- **Google Gemini API** - AI chatbot
+- **CORS** - Cross-origin requests
 
 ---
 
@@ -512,7 +341,7 @@ To deploy this project:
 
 For issues, questions, or suggestions:
 - Open an issue on GitHub
-- Email: udaykumar0515@example.com
+- Email: udaykumarhaibathi@gmail.com
 
 ---
 
